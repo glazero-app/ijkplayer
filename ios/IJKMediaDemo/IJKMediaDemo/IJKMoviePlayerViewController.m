@@ -20,7 +20,9 @@
 #import "IJKCommon.h"
 #import "IJKDemoHistory.h"
 
-@implementation IJKVideoViewController
+@implementation IJKVideoViewController {
+    NSString *filePath;
+}
 
 - (void)dealloc
 {
@@ -41,6 +43,7 @@
     if (self) {
         self.url = [NSURL URLWithString:@"ijklas:"];
         self.manifest = manifest_string;
+        
     }
     return self;
 }
@@ -62,10 +65,21 @@
     return self;
 }
 
-#define EXPECTED_IJKPLAYER_VERSION (1 << 16) & 0xFF) | 
+#define EXPECTED_IJKPLAYER_VERSION (1 << 16) & 0xFF) |
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    if (@available(iOS 14, *)) {
+        
+        [PHPhotoLibrary requestAuthorizationForAccessLevel:PHAccessLevelReadWrite handler:^(PHAuthorizationStatus status) {
+            
+        }];
+    } else {
+        // Fallback on earlier versions
+        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                        
+        }];
+    }
     // Do any additional setup after loading the view from its nib.
 
 //    [[UIApplication sharedApplication] setStatusBarHidden:YES];
@@ -151,24 +165,56 @@
 
 - (IBAction)onClickHUD:(UIBarButtonItem *)sender
 {
+    if ([self.player isRecording]) {
+        [self stopRecord];
+    } else {
+        [self beginRecord];
+    }
     if ([self.player isKindOfClass:[IJKFFMoviePlayerController class]]) {
         IJKFFMoviePlayerController *player = self.player;
-        player.shouldShowHudView = !player.shouldShowHudView;
-        
-        sender.title = (player.shouldShowHudView ? @"HUD On" : @"HUD Off");
+        sender.title = ([player isRecording] ? @"结束录制" : @"开始录制");
     }
+}
+
+- (void)beginRecord {
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+    filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+    if (![self.player isRecording] && [self.player isPlaying]) {
+            [self.player startRecordWithFileName:self->filePath];
+        }
+}
+
+- (void)stopRecord {
+    [self.player stopRecord];
+   PHPhotoLibrary *photoLibrary = [PHPhotoLibrary sharedPhotoLibrary];
+   
+   [photoLibrary performChanges:^{
+       [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL
+                                                                        fileURLWithPath:self->filePath]];
+   } completionHandler:^(BOOL success, NSError * _Nullable error) {
+       [[NSFileManager defaultManager] removeItemAtPath:self->filePath error:nil];
+
+       if (success) {
+           NSLog(@"已将视频保存至相册");
+       } else {
+           NSLog(@"未能保存视频到相册");
+       }
+   }];
 }
 
 - (IBAction)onClickPlay:(id)sender
 {
     [self.player play];
     [self.mediaControl refreshMediaControl];
+    
+    
 }
 
 - (IBAction)onClickPause:(id)sender
 {
     [self.player pause];
     [self.mediaControl refreshMediaControl];
+    
 }
 
 - (IBAction)didSliderTouchDown
@@ -291,22 +337,22 @@
 /* Register observers for the various movie object notifications. */
 -(void)installMovieNotificationObservers
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(loadStateDidChange:)
                                                  name:IJKMPMoviePlayerLoadStateDidChangeNotification
                                                object:_player];
 
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(moviePlayBackDidFinish:)
                                                  name:IJKMPMoviePlayerPlaybackDidFinishNotification
                                                object:_player];
 
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(mediaIsPreparedToPlayDidChange:)
                                                  name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
                                                object:_player];
 
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:IJKMPMoviePlayerPlaybackStateDidChangeNotification
                                                object:_player];

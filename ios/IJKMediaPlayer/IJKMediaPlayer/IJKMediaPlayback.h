@@ -74,6 +74,11 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 - (BOOL)isPlaying;
 - (void)shutdown;
 - (void)setPauseInBackground:(BOOL)pause;
+//添加：
+- (void)stopRecord;
+- (void)startRecordWithFileName:(NSString *)fileName;
+- (BOOL)isRecording;
+
 
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;

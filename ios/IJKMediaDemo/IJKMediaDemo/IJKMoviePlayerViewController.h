@@ -17,6 +17,8 @@
 
 #import <UIKit/UIKit.h>
 #import <IJKMediaFramework/IJKMediaFramework.h>
+#import <Photos/Photos.h>
+
 @class IJKMediaControl;
 
 @interface IJKVideoViewController : UIViewController

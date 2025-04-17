@@ -106,7 +106,7 @@
                                     </connections>
                                 </barButtonItem>
                                 <barButtonItem systemItem="flexibleSpace" id="pST-nN-ULY"/>
-                                <barButtonItem title="HUD Off" id="hpK-Ob-7Cx">
+                                <barButtonItem title="开始录制" id="hpK-Ob-7Cx">
                                     <connections>
                                         <action selector="onClickHUD:" destination="-1" id="xtO-DF-OuD"/>
                                     </connections>
