@@ -796,3 +796,41 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
     return -1;
 }
+
+int ijkmp_isRecording(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is_record;
+}
+
+
+//ijkplayer.c
+static int ijkmp_start_recording_l(IjkMediaPlayer *mp,const char *filePath)
+{
+    //  av_log(mp->ffplayer,AV_LOG_WARING,"cjz ijkmp_start_recording_l filePath %s",filePath);
+    return ffp_start_recording_l(mp->ffplayer,filePath);
+}
+
+int ijkmp_start_recording(IjkMediaPlayer *mp, const char *filePath)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    av_log(mp->ffplayer,AV_LOG_WARNING,"cjz ijkmp_start_recording");
+    int retval = ijkmp_start_recording_l(mp,filePath);
+    printf("ijkmp_start_recording return == %d\n",retval);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+static int ijkmp_stop_recording_l(IjkMediaPlayer *mp)
+{
+    return ffp_stop_recording_l(mp->ffplayer);
+}
+
+int ijkmp_stop_recording(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    av_log(mp->ffplayer,AV_LOG_WARNING,"cjz ijkmp_stop_recording");
+    int retval = ijkmp_stop_recording_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}

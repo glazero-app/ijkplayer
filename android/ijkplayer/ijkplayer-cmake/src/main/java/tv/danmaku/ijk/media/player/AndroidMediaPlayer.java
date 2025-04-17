@@ -247,6 +247,21 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void startRecord(String filePath) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void stopRecord() throws IllegalStateException {
+
+    }
+
+    @Override
+    public boolean isRecording() {
+        return false;
+    }
+
+    @Override
     public void release() {
         mIsReleased = true;
         mInternalMediaPlayer.release();

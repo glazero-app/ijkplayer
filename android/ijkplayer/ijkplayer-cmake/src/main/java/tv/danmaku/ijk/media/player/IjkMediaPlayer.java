@@ -678,6 +678,27 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     @Override
     public native long getDuration();
 
+    @Override
+    public void startRecord(String filePath) {
+        _startRecord(filePath);
+    }
+
+    private native void _startRecord(String filePath) throws IllegalStateException;
+
+    @Override
+    public void stopRecord() throws IllegalStateException {
+        _stopRecord();
+    }
+
+    private native void _stopRecord() throws IllegalStateException;
+
+    @Override
+    public boolean isRecording() {
+        return _isRecording();
+    }
+
+    private native boolean _isRecording();
+
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is
      * considered good practice to call this method when you're done using the

@@ -360,6 +360,50 @@ LABEL_RETURN:
 }
 
 static void
+IjkMediaPlayer_startRecord(JNIEnv *env, jobject thiz, jstring path)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
+
+    const char *c_path = NULL;
+    c_path = (*env)->GetStringUTFChars(env, path, NULL );
+    JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: startRecord: path.string oom", LABEL_RETURN);
+
+    ijkmp_start_recording(mp, c_path);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_stopRecord(JNIEnv *env, jobject thiz)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
+
+    ijkmp_stop_recording(mp);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static jboolean
+IjkMediaPlayer_isRecording(JNIEnv* env,jobject thiz)
+{
+    jboolean retval = JNI_FALSE;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: isPlaying: null mp", LABEL_RETURN);
+
+    retval = ijkmp_isRecording(mp) ? JNI_TRUE : JNI_FALSE;
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static void
 IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 {
     MPTRACE("%s\n", __func__);
@@ -1150,6 +1194,9 @@ static JNINativeMethod g_methods[] = {
     { "isPlaying",              "()Z",      (void *) IjkMediaPlayer_isPlaying },
     { "getCurrentPosition",     "()J",      (void *) IjkMediaPlayer_getCurrentPosition },
     { "getDuration",            "()J",      (void *) IjkMediaPlayer_getDuration },
+    { "_startRecord",           "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startRecord },
+    { "_stopRecord",            "()V",      (void *) IjkMediaPlayer_stopRecord },
+    { "_isRecording",           "()Z",      (void *) IjkMediaPlayer_isRecording },
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },
     { "setVolume",              "(FF)V",    (void *) IjkMediaPlayer_setVolume },

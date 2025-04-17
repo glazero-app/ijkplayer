@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.VideoActivity"
     android:id="@+id/drawer_layout"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,7 +18,7 @@
             android:id="@+id/video_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"></tv.danmaku.ijk.media.example.widget.media.IjkVideoView>
+            android:layout_gravity="center" />
 
         <TextView
             android:id="@+id/toast_text_view"
@@ -46,6 +47,15 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             tools:context=".toolbar_widget" />
+
+        <ImageView
+            android:id="@+id/iv_record"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/icon_record"/>
+
     </FrameLayout>
 
     <!-- The navigation drawer -->
@@ -54,4 +64,5 @@
         android:layout_height="match_parent"
         android:layout_gravity="right"
         android:background="@color/ijk_transparent_dark" />
+
 </androidx.drawerlayout.widget.DrawerLayout>

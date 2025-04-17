@@ -130,6 +130,14 @@ public class SampleMediaListFragment extends Fragment {
                 "}";
 
         //mAdapter.addItem(manifest_string, "las test");
+        mAdapter.addItem("http://vjs.zencdn.net/v/oceans.mp4","mp4");
+        mAdapter.addItem("https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8","m3u8");
+        mAdapter.addItem("https://bdcloud-player-new.cdn.bcebos.com/testvideo/hls/265/1080p/liulangdiqiu/liulangdiqiu-265-1080.m3u8","h265");
+        mAdapter.addItem("https://bdcloud-player-new.cdn.bcebos.com/testvideo/mp4/vvc/1080p/liulangdiqiu-266-1080.mp4","h266");
+        mAdapter.addItem("https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv","flv");
+        mAdapter.addItem("rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid","rtmp");
+
+        // 原来的
         mAdapter.addItem("http://10.18.17.49/samba/video/4.mp4","4.mp4");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");

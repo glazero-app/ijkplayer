@@ -35,7 +35,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -61,6 +63,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private TableLayout mHudView;
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
+    private ImageView mIvRecord;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -131,6 +134,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mHudView = (TableLayout) findViewById(R.id.hud_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
+        mIvRecord = (ImageView) findViewById(R.id.iv_record);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
@@ -152,12 +156,23 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             return;
         }
         mVideoView.start();
+
+        mIvRecord.setOnClickListener(view -> {
+            if (!mVideoView.isRecording()) {
+                String path = "/sdcard/DCIM/gzplayer/";
+                String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
+                mVideoView.startRecord(name);
+                mIvRecord.setImageResource(R.drawable.icon_recording);
+            } else {
+                mVideoView.stopRecord();
+                mIvRecord.setImageResource(R.drawable.icon_record);
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
         mBackPressed = true;
-
         super.onBackPressed();
     }
 

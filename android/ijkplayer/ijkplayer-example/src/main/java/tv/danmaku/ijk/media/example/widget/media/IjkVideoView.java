@@ -899,6 +899,22 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return 0;
     }
 
+    public void startRecord(String path) {
+        if (mMediaPlayer != null)
+            mMediaPlayer.startRecord(path);
+    }
+
+    public void stopRecord() {
+        if (mMediaPlayer != null)
+            mMediaPlayer.stopRecord();
+    }
+
+    public boolean isRecording() {
+        if (mMediaPlayer != null)
+            return mMediaPlayer.isRecording();
+        return false;
+    }
+
     // REMOVED: getAudioSessionId();
     // REMOVED: onAttachedToWindow();
     // REMOVED: onDetachedFromWindow();

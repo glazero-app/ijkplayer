@@ -86,6 +86,15 @@
 #define AV_CODEC_CAP_DR1 CODEC_CAP_DR1
 #endif
 
+// FIXME: 9 work around NDKr8e or gcc4.7 bug
+// isnan() may not recognize some double NAN, so we test both double and float
+#if defined(__ANDROID__)
+#ifdef isnan
+#undef isnan
+#endif
+#define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
+#endif
+
 #if defined(__ANDROID__)
 #define printf(...) ALOGD(__VA_ARGS__)
 #endif
@@ -428,15 +437,15 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
 
     if (!img_info->frame_img_convert_ctx) {
         img_info->frame_img_convert_ctx = sws_getContext(width,
-		    height,
-		    src_frame->format,
-		    dst_width,
-		    dst_height,
-		    AV_PIX_FMT_RGB24,
-		    SWS_BICUBIC,
-		    NULL,
-		    NULL,
-		    NULL);
+            height,
+            src_frame->format,
+            dst_width,
+            dst_height,
+            AV_PIX_FMT_RGB24,
+            SWS_BICUBIC,
+            NULL,
+            NULL,
+            NULL);
 
         if (!img_info->frame_img_convert_ctx) {
             ret = -1;
@@ -452,7 +461,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
             av_log(NULL, AV_LOG_ERROR, "%s avcodec_find_encoder failed\n", __func__);
             goto fail0;
         }
-	    img_info->frame_img_codec_ctx = avcodec_alloc_context3(image_codec);
+        img_info->frame_img_codec_ctx = avcodec_alloc_context3(image_codec);
         if (!img_info->frame_img_codec_ctx) {
             ret = -1;
             av_log(NULL, AV_LOG_ERROR, "%s avcodec_alloc_context3 failed\n", __func__);
@@ -475,7 +484,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
         goto fail0;
     }
     bytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, dst_width, dst_height, 1);
-	buffer = (uint8_t *) av_malloc(bytes * sizeof(uint8_t));
+    buffer = (uint8_t *) av_malloc(bytes * sizeof(uint8_t));
     if (!buffer) {
         ret = -1;
         av_log(NULL, AV_LOG_ERROR, "%s av_image_get_buffer_size failed\n", __func__);
@@ -615,7 +624,20 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                     return -1;
             }
         } while (d->queue->serial != d->pkt_serial);
-
+        
+        if (!ffp->is_first && pkt.pts == pkt.dts) { // 获取开始录制前dts等于pts最后的值
+                   ffp->start_pts = pkt.pts;
+                   ffp->start_dts = pkt.dts;
+               }
+             #pragma  mark - 录制插入
+               if (ffp->is_record) { // 可以录制时，写入文件
+                   if (0 != ffp_record_file(ffp, &pkt)) {
+                       ffp->record_error = 1;
+                       ffp_stop_recording_l(ffp);
+                       printf("avcodec_send_packet stop\n");
+                   }
+               }
+        
         if (pkt.data == flush_pkt.data) {
             avcodec_flush_buffers(d->avctx);
             d->finished = 0;
@@ -1461,44 +1483,45 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
 #ifdef FFP_MERGE
     int sdl_format;
 #endif
-
+    
     vp = &is->pictq.queue[is->pictq.windex];
-
+    
     free_picture(vp);
-
+    
 #ifdef FFP_MERGE
     video_open(is, vp);
 #endif
-
+    
     SDL_VoutSetOverlayFormat(ffp->vout, ffp->overlay_format);
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
-                                   frame_format,
-                                   ffp->vout);
+                                     frame_format,
+                                     ffp->vout);
 #ifdef FFP_MERGE
     if (vp->format == AV_PIX_FMT_YUV420P)
         sdl_format = SDL_PIXELFORMAT_YV12;
     else
         sdl_format = SDL_PIXELFORMAT_ARGB8888;
-
+    
     if (realloc_texture(&vp->bmp, sdl_format, vp->width, vp->height, SDL_BLENDMODE_NONE, 0) < 0) {
 #else
-    /* RV16, RV32 contains only one plane */
-    if (!vp->bmp || (!vp->bmp->is_private && vp->bmp->pitches[0] < vp->width)) {
+        /* RV16, RV32 contains only one plane */
+        if (!vp->bmp || (!vp->bmp->is_private && vp->bmp->pitches[0] < vp->width)) {
 #endif
-        /* SDL allocates a buffer smaller than requested if the video
-         * overlay hardware is unable to support the requested size. */
-        av_log(NULL, AV_LOG_FATAL,
-               "Error: the video system does not support an image\n"
-                        "size of %dx%d pixels. Try using -lowres or -vf \"scale=w:h\"\n"
-                        "to reduce the image size.\n", vp->width, vp->height );
-        free_picture(vp);
+            /* SDL allocates a buffer smaller than requested if the video
+             * overlay hardware is unable to support the requested size. */
+            av_log(NULL, AV_LOG_FATAL,
+                   "Error: the video system does not support an image\n"
+                   "size of %dx%d pixels. Try using -lowres or -vf \"scale=w:h\"\n"
+                   "to reduce the image size.\n", vp->width, vp->height );
+            free_picture(vp);
+        }
+        
+        SDL_LockMutex(is->pictq.mutex);
+        vp->allocated = 1;
+        SDL_CondSignal(is->pictq.cond);
+        SDL_UnlockMutex(is->pictq.mutex);
     }
 
-    SDL_LockMutex(is->pictq.mutex);
-    vp->allocated = 1;
-    SDL_CondSignal(is->pictq.cond);
-    SDL_UnlockMutex(is->pictq.mutex);
-}
 
 static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)
 {
@@ -2351,31 +2374,31 @@ static int subtitle_thread(void *arg)
 
         if ((got_subtitle = decoder_decode_frame(ffp, &is->subdec, NULL, &sp->sub)) < 0)
             break;
-
+        
         pts = 0;
 #ifdef FFP_MERGE
         if (got_subtitle && sp->sub.format == 0) {
 #else
-        if (got_subtitle) {
+            if (got_subtitle) {
 #endif
-            if (sp->sub.pts != AV_NOPTS_VALUE)
-                pts = sp->sub.pts / (double)AV_TIME_BASE;
-            sp->pts = pts;
-            sp->serial = is->subdec.pkt_serial;
-            sp->width = is->subdec.avctx->width;
-            sp->height = is->subdec.avctx->height;
-            sp->uploaded = 0;
-
-            /* now we can update the picture count */
-            frame_queue_push(&is->subpq);
+                if (sp->sub.pts != AV_NOPTS_VALUE)
+                    pts = sp->sub.pts / (double)AV_TIME_BASE;
+                sp->pts = pts;
+                sp->serial = is->subdec.pkt_serial;
+                sp->width = is->subdec.avctx->width;
+                sp->height = is->subdec.avctx->height;
+                sp->uploaded = 0;
+                
+                /* now we can update the picture count */
+                frame_queue_push(&is->subpq);
 #ifdef FFP_MERGE
-        } else if (got_subtitle) {
-            avsubtitle_free(&sp->sub);
+            } else if (got_subtitle) {
+                avsubtitle_free(&sp->sub);
 #endif
+            }
         }
+        return 0;
     }
-    return 0;
-}
 
 /* copy samples for viewing in editor window */
 static void update_sample_display(VideoState *is, short *samples, int samples_size)
@@ -3987,6 +4010,7 @@ FFPlayer *ffp_create()
     ffp->meta = ijkmeta_create();
 
     av_opt_set_defaults(ffp);
+
     return ffp;
 }
 
@@ -4127,7 +4151,7 @@ void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)
     ijkio_manager_destroyp(&ffp->ijkio_manager_ctx);
     ijkio_manager_create(&ffp->ijkio_manager_ctx, ffp);
     ijkio_manager_set_callback(ffp->ijkio_manager_ctx, ijkio_app_func_event);
-    ffp_set_option_intptr(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkiomanager", (uintptr_t)ffp->ijkio_manager_ctx);
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkiomanager", (int64_t)(intptr_t)ffp->ijkio_manager_ctx);
 
     return prev_weak_thiz;
 }
@@ -4141,7 +4165,7 @@ void *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
 
     av_application_closep(&ffp->app_ctx);
     av_application_open(&ffp->app_ctx, ffp);
-    ffp_set_option_intptr(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (uint64_t)(intptr_t)ffp->app_ctx);
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
 
     ffp->app_ctx->func_on_app_event = app_func_event;
     return prev_weak_thiz;
@@ -4163,15 +4187,6 @@ void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64
 
     AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
     av_dict_set_int(dict, name, value, 0);
-}
-
-void ffp_set_option_intptr(FFPlayer *ffp, int opt_category, const char *name, uintptr_t value)
-{
-    if (!ffp)
-        return;
-
-    AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
-    av_dict_set_intptr(dict, name, value, 0);
 }
 
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
@@ -5039,3 +5054,171 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 
     return ffp->meta;
 }
+
+
+//ff_play.c
+//插入录制方法
+int ffp_start_recording_l(FFPlayer *ffp,const char *file_name)
+{
+    assert(ffp);
+    VideoState *is = ffp->is;
+    
+    ffp->m_ofmt_ctx = NULL;
+    ffp->m_ofmt = NULL;
+    ffp->is_record = 0;
+    ffp->record_error = 0;
+    
+    if (!file_name || !strlen(file_name)) { // 没有路径
+        av_log(ffp, AV_LOG_ERROR, "filename is invalid");
+        goto end;
+    }
+    
+    if (!is || !is->ic|| is->paused || is->abort_request) { // 没有上下文，或者上下文已经停止
+        av_log(ffp, AV_LOG_ERROR, "is,is->ic,is->paused is invalid");
+        goto end;
+    }
+    
+    if (ffp->is_record) { // 已经在录制
+        av_log(ffp, AV_LOG_ERROR, "recording has started");
+        goto end;
+    }
+    
+    // 初始化一个用于输出的AVFormatContext结构体
+    avformat_alloc_output_context2(&ffp->m_ofmt_ctx, NULL, NULL, file_name);
+    if (!ffp->m_ofmt_ctx) {
+        av_log(ffp, AV_LOG_ERROR, "Could not create output context filename is %s\n", file_name);
+        goto end;
+    }
+    ffp->m_ofmt = ffp->m_ofmt_ctx->oformat;
+    
+    for (int i = 0; i < is->ic->nb_streams; i++) {
+        // 对照输入流创建输出流通道
+        AVStream *out_stream;
+        AVStream *in_stream = is->ic->streams[i];
+        AVCodecParameters *in_codecpar = in_stream->codecpar;
+        
+        if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
+            in_codecpar->codec_type != AVMEDIA_TYPE_VIDEO &&
+            in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+            continue;
+        }
+        
+        out_stream = avformat_new_stream(ffp->m_ofmt_ctx, NULL);
+        if (!out_stream) {
+            av_log(ffp, AV_LOG_ERROR, "Failed allocating output stream\n");
+            goto end;
+        }
+        
+        // 将输入视频/音频的参数拷贝至输出视频/音频的AVCodecContext结构体
+        if (avcodec_parameters_copy(out_stream->codecpar, in_codecpar) < 0) {
+            av_log(ffp, AV_LOG_ERROR, "Failed to copy codec parameters\n");
+            goto end;
+        }
+        out_stream->codecpar->codec_tag = 0;
+    }
+    
+    av_dump_format(ffp->m_ofmt_ctx, 0, file_name, 1);
+    
+    // 打开输出文件
+    if (!(ffp->m_ofmt->flags & AVFMT_NOFILE)) {
+        if (avio_open(&ffp->m_ofmt_ctx->pb, file_name, AVIO_FLAG_WRITE) < 0) {
+            av_log(ffp, AV_LOG_ERROR, "Could not open output file '%s'", file_name);
+            goto end;
+        }
+    }
+    
+    // 写视频文件头
+    if (avformat_write_header(ffp->m_ofmt_ctx, NULL) < 0) {
+        av_log(ffp, AV_LOG_ERROR, "Error occurred when opening output file\n");
+        goto end;
+    }
+    
+    ffp->is_record = 1;
+    ffp->record_error = 0;
+    pthread_mutex_init(&ffp->record_mutex, NULL);
+    
+    return 0;
+end:
+    ffp->record_error = 1;
+    return -1;
+}
+
+int ffp_record_file(FFPlayer *ffp, AVPacket *packet){
+    assert(ffp);
+    VideoState *is = ffp->is;
+    int ret = 0;
+    AVStream *in_stream;
+    AVStream *out_stream;
+    if (ffp->is_record) {
+        if (packet == NULL) {
+            ffp->record_error = 1;
+            av_log(ffp, AV_LOG_ERROR, "packet == NULL");
+            printf("ffp_record_file return null 1");
+            return -1;
+        }
+        
+        AVPacket *pkt = (AVPacket *)av_malloc(sizeof(AVPacket)); // 与看直播的 AVPacket分开，不然卡屏
+        av_new_packet(pkt, 0);
+        if (0 == av_packet_ref(pkt, packet)) {
+            pthread_mutex_lock(&ffp->record_mutex);
+            if (!ffp->is_first) { // 录制的第一帧，时间从0开始
+                ffp->is_first = 1;
+                pkt->pts = 0;
+                pkt->dts = 0;
+            } else { // 之后的每一帧都要减去，点击开始录制时的值，这样的时间才是正确的
+                
+                pkt->pts = llabs(pkt->pts - ffp->start_pts);
+                pkt->dts = llabs(pkt->dts - ffp->start_dts);
+                printf("AVMEDIA_TYPE_VIDEO pkt->pts == %lld pkt->dts == %lld\n",pkt->pts,pkt->dts);
+            }
+            
+            in_stream  = is->ic->streams[pkt->stream_index];
+            out_stream = ffp->m_ofmt_ctx->streams[pkt->stream_index];
+            
+            // 转换PTS/DTS
+            pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+            pkt->pos = -1;
+            
+            // 写入一个AVPacket到输出文件
+            if ((ret = av_interleaved_write_frame(ffp->m_ofmt_ctx, pkt)) < 0) {
+                av_log(ffp, AV_LOG_ERROR, "Error muxing packet\n");
+            }
+            
+            av_packet_unref(pkt);
+            pthread_mutex_unlock(&ffp->record_mutex);
+        } else {
+            av_log(ffp, AV_LOG_ERROR, "av_packet_ref == NULL");
+            printf("ffp_record_file return null 2");
+        }
+    }
+    printf("ffp_record_file return null 3 == %d\n",ret);
+    return ret;
+}
+
+
+int ffp_stop_recording_l(FFPlayer *ffp){
+    assert(ffp);
+    if (ffp->is_record) {
+        ffp->is_record = 0;
+        pthread_mutex_lock(&ffp->record_mutex);
+        if (ffp->m_ofmt_ctx != NULL) {
+            av_write_trailer(ffp->m_ofmt_ctx);
+            if (ffp->m_ofmt_ctx && !(ffp->m_ofmt->flags & AVFMT_NOFILE)) {
+                avio_close(ffp->m_ofmt_ctx->pb);
+            }
+            avformat_free_context(ffp->m_ofmt_ctx);
+            ffp->m_ofmt_ctx = NULL;
+            ffp->is_first = 0;
+            ffp ->record_error = 0;
+        }
+        pthread_mutex_unlock(&ffp->record_mutex);
+        pthread_mutex_destroy(&ffp->record_mutex);
+        av_log(ffp, AV_LOG_DEBUG, "stopRecord ok\n");
+    } else {
+        av_log(ffp, AV_LOG_ERROR, "don't need stopRecord\n");
+    }
+    return 0;
+}
+
