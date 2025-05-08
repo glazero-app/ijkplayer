@@ -699,6 +699,34 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native boolean _isRecording();
 
+    @Override
+    public void startDownload(String url, String filePath) throws IllegalStateException {
+        _startDownload(url, filePath);
+    }
+
+    private native void _startDownload(String url, String filePath) throws IllegalStateException;
+
+    @Override
+    public void pauseDownload(String url, String filePath) throws IllegalStateException {
+        _pauseDownload(url);
+    }
+
+    private native void _pauseDownload(String url) throws IllegalStateException;
+
+    @Override
+    public void resumeDownload(String url, String filePath) throws IllegalStateException {
+        _resumeDownload(url);
+    }
+
+    private native void _resumeDownload(String url) throws IllegalStateException;
+
+    @Override
+    public void stopDownload(String url) throws IllegalStateException {
+        _stopDownload(url);
+    }
+
+    private native void _stopDownload(String url) throws IllegalStateException;
+
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is
      * considered good practice to call this method when you're done using the

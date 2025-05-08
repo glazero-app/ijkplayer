@@ -40,7 +40,6 @@ public class FileExplorerActivity extends AppActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         if (mSettings == null) {
             mSettings = new Settings(this);
         }

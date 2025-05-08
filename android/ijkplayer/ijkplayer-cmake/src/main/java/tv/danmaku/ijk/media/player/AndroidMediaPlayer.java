@@ -262,6 +262,26 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void startDownload(String url, String filePath) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void pauseDownload(String url, String filePath) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void resumeDownload(String url, String filePath) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void stopDownload(String url) throws IllegalStateException {
+
+    }
+
+    @Override
     public void release() {
         mIsReleased = true;
         mInternalMediaPlayer.release();

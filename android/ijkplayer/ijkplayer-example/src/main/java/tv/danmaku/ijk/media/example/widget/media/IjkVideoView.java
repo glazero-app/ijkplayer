@@ -913,6 +913,16 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return false;
     }
 
+    public void startDownload(String url, String path) {
+        if (mMediaPlayer != null)
+            mMediaPlayer.startDownload(url, path);
+    }
+
+    public void stopDownload(String url) {
+        if (mMediaPlayer != null)
+            mMediaPlayer.stopDownload(url);
+    }
+
     // REMOVED: getAudioSessionId();
     // REMOVED: onAttachedToWindow();
     // REMOVED: onDetachedFromWindow();

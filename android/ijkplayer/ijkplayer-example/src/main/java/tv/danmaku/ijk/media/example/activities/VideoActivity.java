@@ -63,6 +63,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
     private ImageView mIvRecord;
+    private ImageView mIvDownload;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -134,6 +135,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
         mIvRecord = (ImageView) findViewById(R.id.iv_record);
+        mIvDownload = (ImageView) findViewById(R.id.iv_download);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
@@ -166,6 +168,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 mVideoView.stopRecord();
                 mIvRecord.setImageResource(R.drawable.icon_record);
             }
+        });
+
+        mIvDownload.setOnClickListener(view -> {
+            String path = "/sdcard/DCIM/gzplayer/";
+            String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
+            mVideoView.startDownload(mVideoPath, name);
         });
     }
 

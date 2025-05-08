@@ -846,7 +846,7 @@ int ijkmp_stop_recording(IjkMediaPlayer *mp)
     return retval;
 }
 
-int ijkmp_download_video(const char *url, const char *output_file,  void (^progress_callback)(int progress)) {
+int ijkmp_download_video(const char *url, const char *output_file,  void (progress_callback)(int progress)) {
     is_cancel_download = false;
     AVFormatContext *input_format_context = NULL;
     AVFormatContext *output_format_context = NULL;
