@@ -38,8 +38,18 @@
 
     [sampleList addObject:@[@"las url",
     @"{\"version\":\"1.0.0\",\"adaptationSet\":[{\"duration\":1000,\"id\":1,\"representation\":[{\"id\":1,\"codec\":\"avc1.64001e,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":700,\"width\":640,\"height\":360,\"frameRate\":25,\"qualityType\":\"SMOOTH\",\"qualityTypeName\":\"流畅\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false},{\"id\":2,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":1300,\"width\":960,\"height\":540,\"frameRate\":25,\"qualityType\":\"STANDARD\",\"qualityTypeName\":\"标清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":true},{\"id\":3,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":2300,\"width\":1280,\"height\":720,\"frameRate\":30,\"qualityType\":\"HIGH\",\"qualityTypeName\":\"高清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false}]}]}"]];
-    [sampleList addObject:@[@"bipbop basic master playlist",
-                            @"https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"]];
+    [sampleList addObject:@[@"mp4",
+                            @"http://vjs.zencdn.net/v/oceans.mp4"]];
+    [sampleList addObject:@[@"m3u8",
+                            @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8"]];
+    [sampleList addObject:@[@"h265-m3u8",
+                            @"https://bdcloud-player-new.cdn.bcebos.com/testvideo/hls/265/1080p/liulangdiqiu/liulangdiqiu-265-1080.m3u8"]];
+    [sampleList addObject:@[@"1080-mp4",
+                            @"https://bdcloud-player-new.cdn.bcebos.com/testvideo/mp4/vvc/1080p/liulangdiqiu-266-1080.mp4"]];
+    [sampleList addObject:@[@"flv",
+                            @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv"]];
+    [sampleList addObject:@[@"rtmp",
+                            @"rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid"]];
     self.sampleList = sampleList;
 }
 

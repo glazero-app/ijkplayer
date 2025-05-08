@@ -107,13 +107,26 @@
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
-    self.player.shouldAutoplay = YES;
-
+    self.player.shouldAutoplay = NO;
+    [self.player setPauseInBackground:YES];
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
-
     self.mediaControl.delegatePlayer = self.player;
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
+        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv";
+        NSString *uuid = [[NSUUID UUID] UUIDString];
+        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath progress:^(int progress) {
+            NSLog(@"当前下载进度--->%d",progress);
+        }];
+        [self saveFileToPhotoLibrary:outfilePath];
+        NSLog(@"%@", outfilePath);
+    });
+    
+   
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -180,26 +193,32 @@
     NSString *uuid = [[NSUUID UUID] UUIDString];
     filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
     if (![self.player isRecording] && [self.player isPlaying]) {
-            [self.player startRecordWithFileName:self->filePath];
+        [self.player startRecordWithFileName:self->filePath recordFail:^(int errorCode) {
+            NSLog(@"%d", errorCode);
+        }];
         }
 }
 
 - (void)stopRecord {
     [self.player stopRecord];
-   PHPhotoLibrary *photoLibrary = [PHPhotoLibrary sharedPhotoLibrary];
-   
-   [photoLibrary performChanges:^{
-       [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL
-                                                                        fileURLWithPath:self->filePath]];
-   } completionHandler:^(BOOL success, NSError * _Nullable error) {
-       [[NSFileManager defaultManager] removeItemAtPath:self->filePath error:nil];
+    [self saveFileToPhotoLibrary:filePath];
+}
 
-       if (success) {
-           NSLog(@"已将视频保存至相册");
-       } else {
-           NSLog(@"未能保存视频到相册");
-       }
-   }];
+-(void)saveFileToPhotoLibrary:(NSString *)filePath {
+    PHPhotoLibrary *photoLibrary = [PHPhotoLibrary sharedPhotoLibrary];
+    
+    [photoLibrary performChanges:^{
+        [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL
+                                                                         fileURLWithPath:filePath]];
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+
+        if (success) {
+            NSLog(@"已将视频保存至相册");
+            [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+        } else {
+            NSLog(@"未能保存视频到相册");
+        }
+    }];
 }
 
 - (IBAction)onClickPlay:(id)sender

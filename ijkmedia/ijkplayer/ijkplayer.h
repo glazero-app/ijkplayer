@@ -29,6 +29,8 @@
 
 #include "ijkmeta.h"
 
+#include "ff_ffplay.h"
+
 #ifndef MPTRACE
 #define MPTRACE ALOGD
 #endif
@@ -224,4 +226,14 @@ void ijkmp_set_subtitle_preference(IjkMediaPlayer *mp, IJKSDLSubtitlePreference*
 int             ijkmp_start_recording(IjkMediaPlayer *mp, const char *filePath);
 int             ijkmp_stop_recording(IjkMediaPlayer *mp);
 int             ijkmp_isRecording(IjkMediaPlayer *mp);
+void            ijkmp_global_set_record_fail_callback(ffp_record_fail_callback cb);
+
+/// 下载视频并转成mp4存储 return == 0下载成功，其它表示失败;  业务层使用时需要放在子线程执行，不然会阻塞UI线程
+/// - Parameters:
+///   - url: 下载链接
+///   - output_file: 下载文件路径需要包含文件名 example: test.mp4
+///   - progress_callback： 下载进度回调 0-100
+int ijkmp_download_video(const char *url, const char *output_file, void (^progress_callback)(int progress));
+
+
 #endif

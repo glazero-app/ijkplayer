@@ -24,6 +24,9 @@
 #include "ijkplayer.h"
 #include "ijkplayer_internal.h"
 #include "ijkversion.h"
+#include <stdio.h>
+#include <libavformat/avformat.h>
+#include <libavutil/timestamp.h>
 
 #define MP_RET_IF_FAILED(ret) \
     do { \
@@ -90,6 +93,12 @@ void ijkmp_global_set_inject_callback(ijk_inject_callback cb)
 {
     ffp_global_set_inject_callback(cb);
 }
+
+void ijkmp_global_set_record_fail_callback(ffp_record_fail_callback cb)
+{
+    ffp_global_set_record_fail_callback(cb);
+}
+
 
 const char *ijkmp_version()
 {
@@ -833,4 +842,196 @@ int ijkmp_stop_recording(IjkMediaPlayer *mp)
     int retval = ijkmp_stop_recording_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
+}
+
+int ijkmp_download_video(const char *url, const char *output_file,  void (^progress_callback)(int progress)) {
+    AVFormatContext *input_format_context = NULL;
+    AVFormatContext *output_format_context = NULL;
+    AVOutputFormat *output_format = NULL;
+    AVStream *in_stream = NULL;
+    AVStream *out_stream = NULL;
+    int stream_index = 0;
+    int *stream_mapping = NULL;
+    int stream_mapping_size = 0;
+    int ret;
+    int oldProgress = 0;
+    int64_t total_size = 0;
+    int64_t downloaded_size = 0;
+
+    // 初始化 FFmpeg 库
+    avformat_network_init();
+
+    // 打开输入网络流
+    ret = avformat_open_input(&input_format_context, url, NULL, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "无法打开输入流: %s\n", av_err2str(ret));
+        return ret;
+    }
+
+    // 查找流信息
+    ret = avformat_find_stream_info(input_format_context, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "无法查找流信息: %s\n", av_err2str(ret));
+        avformat_close_input(&input_format_context);
+        return ret;
+    }
+
+    // 获取输入流的总大小
+    if (input_format_context->pb && input_format_context->pb->seekable & AVIO_SEEKABLE_NORMAL) {
+        total_size = avio_size(input_format_context->pb);
+    }
+
+    // 分配输出格式上下文
+    avformat_alloc_output_context2(&output_format_context, NULL, NULL, output_file);
+    if (!output_format_context) {
+        fprintf(stderr, "无法创建输出上下文\n");
+        avformat_close_input(&input_format_context);
+        return AVERROR_UNKNOWN;
+    }
+    output_format = output_format_context->oformat;
+
+    stream_mapping_size = input_format_context->nb_streams;
+    stream_mapping = av_mallocz_array(stream_mapping_size, sizeof(*stream_mapping));
+    if (!stream_mapping) {
+        fprintf(stderr, "无法分配流映射数组\n");
+        avformat_close_input(&input_format_context);
+        avformat_free_context(output_format_context);
+        return AVERROR(ENOMEM);
+    }
+
+    for (unsigned int i = 0; i < input_format_context->nb_streams; i++) {
+        in_stream = input_format_context->streams[i];
+        AVCodecParameters *in_codecpar = in_stream->codecpar;
+
+        if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
+            in_codecpar->codec_type != AVMEDIA_TYPE_VIDEO &&
+            in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+            stream_mapping[i] = -1;
+            continue;
+        }
+
+        stream_mapping[i] = stream_index++;
+
+        // 创建输出流
+        out_stream = avformat_new_stream(output_format_context, NULL);
+        if (!out_stream) {
+            fprintf(stderr, "无法分配输出流\n");
+            avformat_close_input(&input_format_context);
+            avformat_free_context(output_format_context);
+            av_freep(&stream_mapping);
+            return AVERROR_UNKNOWN;
+        }
+
+        // 复制输入流的编解码器参数到输出流
+        if (avcodec_parameters_copy(out_stream->codecpar, in_codecpar) < 0) {
+            fprintf(stderr, "无法复制编解码器参数\n");
+            avformat_close_input(&input_format_context);
+            avformat_free_context(output_format_context);
+            av_freep(&stream_mapping);
+            return AVERROR_UNKNOWN;
+        }
+        out_stream->codecpar->codec_tag = 0;
+
+        // 复制元数据
+        av_dict_copy(&out_stream->metadata, in_stream->metadata, 0);
+
+        // 确保帧率和时间基一致
+        out_stream->time_base = in_stream->time_base;
+        out_stream->avg_frame_rate = in_stream->avg_frame_rate;
+    }
+
+    // 打开输出文件
+    if (!(output_format->flags & AVFMT_NOFILE)) {
+        if (avio_open(&output_format_context->pb, output_file, AVIO_FLAG_WRITE) < 0) {
+            fprintf(stderr, "无法打开输出文件: %s\n", av_err2str(ret));
+            avformat_close_input(&input_format_context);
+            avformat_free_context(output_format_context);
+            av_freep(&stream_mapping);
+            return ret;
+        }
+    }
+
+    // 写入文件头
+    if (avformat_write_header(output_format_context, NULL) < 0) {
+        fprintf(stderr, "打开输出文件时出错\n");
+        avformat_close_input(&input_format_context);
+        if (output_format_context && !(output_format->flags & AVFMT_NOFILE))
+            avio_closep(&output_format_context->pb);
+        avformat_free_context(output_format_context);
+        av_freep(&stream_mapping);
+        return AVERROR_UNKNOWN;
+    }
+
+    AVPacket packet;
+    int64_t first_pts = AV_NOPTS_VALUE;
+    while (1) {
+        ret = av_read_frame(input_format_context, &packet);
+        if (ret < 0) {
+            if (ret == AVERROR_EOF) {
+                break;
+            } else {
+                fprintf(stderr, "读取帧时出错: %s\n", av_err2str(ret));
+                break;
+            }
+        }
+
+        in_stream = input_format_context->streams[packet.stream_index];
+        if (packet.stream_index >= stream_mapping_size ||
+            stream_mapping[packet.stream_index] < 0) {
+            av_packet_unref(&packet);
+            continue;
+        }
+
+        downloaded_size += packet.size;
+        if (total_size > 0) {
+            if (progress_callback) {
+                int progress = (((double)downloaded_size / total_size) * 100);
+                if (oldProgress != progress) {
+                    progress_callback(progress);
+                    oldProgress = progress;
+                }
+            }
+        }
+
+        packet.stream_index = stream_mapping[packet.stream_index];
+        out_stream = output_format_context->streams[packet.stream_index];
+
+        // 处理起始偏移
+        if (first_pts == AV_NOPTS_VALUE) {
+            first_pts = packet.pts;
+        }
+        packet.pts -= first_pts;
+        packet.dts -= first_pts;
+
+        // 转换时间戳
+        av_packet_rescale_ts(&packet, in_stream->time_base, out_stream->time_base);
+        packet.pos = -1;
+
+        // 写入数据包
+        ret = av_interleaved_write_frame(output_format_context, &packet);
+        if (ret < 0) {
+            fprintf(stderr, "混合数据包时出错: %s\n", av_err2str(ret));
+            av_packet_unref(&packet);
+            break;
+        }
+        av_packet_unref(&packet);
+    }
+
+    // 写入文件尾
+    if (av_write_trailer(output_format_context) < 0) {
+        fprintf(stderr, "写入文件尾时出错\n");
+    }
+
+    // 释放资源
+    if (input_format_context)
+        avformat_close_input(&input_format_context);
+    if (output_format_context && !(output_format->flags & AVFMT_NOFILE))
+        avio_closep(&output_format_context->pb);
+    if (output_format_context)
+        avformat_free_context(output_format_context);
+    av_freep(&stream_mapping);
+    if (progress_callback) {
+        progress_callback(100);
+    }
+    return 0;
 }

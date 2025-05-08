@@ -76,7 +76,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 - (void)setPauseInBackground:(BOOL)pause;
 //添加：
 - (void)stopRecord;
-- (void)startRecordWithFileName:(NSString *)fileName;
+- (void)startRecordWithFileName:(NSString *)fileName recordFail:(void(^)(int errorCode))failBlock;
 - (BOOL)isRecording;
 
 

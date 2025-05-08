@@ -140,6 +140,13 @@ int64_t get_valid_channel_layout(int64_t channel_layout, int channels)
 
 static void free_picture(Frame *vp);
 
+static ffp_record_fail_callback s_record_fail_callback;
+
+void ffp_global_set_record_fail_callback(ffp_record_fail_callback cb) {
+    s_record_fail_callback = cb;
+}
+
+
 static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
     MyAVPacketList *pkt1;
@@ -5183,6 +5190,9 @@ int ffp_record_file(FFPlayer *ffp, AVPacket *packet){
             
             // 写入一个AVPacket到输出文件
             if ((ret = av_interleaved_write_frame(ffp->m_ofmt_ctx, pkt)) < 0) {
+                if (s_record_fail_callback) {
+                    s_record_fail_callback(ffp->inject_opaque, ret);
+                }
                 av_log(ffp, AV_LOG_ERROR, "Error muxing packet\n");
             }
             
@@ -5193,7 +5203,6 @@ int ffp_record_file(FFPlayer *ffp, AVPacket *packet){
             printf("ffp_record_file return null 2");
         }
     }
-    printf("ffp_record_file return null 3 == %d\n",ret);
     return ret;
 }
 

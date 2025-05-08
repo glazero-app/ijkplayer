@@ -46,6 +46,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
 
 @interface IJKFFMoviePlayerController()
 
+@property (nonatomic, copy) void(^recordFailBlock)(int errorCode);
+
 @end
 
 @implementation IJKFFMoviePlayerController {
@@ -182,7 +184,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (self) {
         ijkmp_global_init();
         ijkmp_global_set_inject_callback(ijkff_inject_callback);
-
+        ijkmp_global_set_record_fail_callback(record_error);
         [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:NO];
 
         if (options == nil)
@@ -1811,8 +1813,9 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
     ijkmp_stop_recording(_mediaPlayer);
     NSLog(@"stop record");
 }
-- (void)startRecordWithFileName:(NSString *)fileName{
+- (void)startRecordWithFileName:(NSString *)fileName recordFail:(void (^)(int))failBlock{
     // 视频存储的路径
+    self.recordFailBlock = failBlock;
     const char *path = [fileName cStringUsingEncoding:NSUTF8StringEncoding];
     ijkmp_start_recording(_mediaPlayer, path);
     NSLog(@"start record fileName %@",fileName);
@@ -1820,6 +1823,27 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
 - (BOOL)isRecording {
     return ijkmp_isRecording(_mediaPlayer);
 }
+
+
+static void record_error(void *opaque ,int errorCode) {
+    IJKWeakHolder *weakHolder = (__bridge IJKWeakHolder*)opaque;
+    IJKFFMoviePlayerController *mpc = weakHolder.object;
+    if (mpc.recordFailBlock) {
+        mpc.recordFailBlock(errorCode);
+    }
+}
+
++(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock{
+    const char *cUrl = [url UTF8String];
+    const char *cOutputFile = [outputFile UTF8String];
+       int ret = ijkmp_download_video(cUrl, cOutputFile, ^(int progress){
+        progressBlock(progress);
+    });
+    return  ret == 0;
+}
+
+
+
 
 
 @end

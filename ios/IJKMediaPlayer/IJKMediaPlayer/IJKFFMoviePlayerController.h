@@ -105,6 +105,14 @@ typedef enum IJKLogLevel {
 + (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
                             version:(NSString *)version;
 
+/// 下载远端视频并转成mp4
+/// - Parameters:
+///   - url: 视频链接
+///   - outputFile: 文件地址
+///   - progressBlock: 下载进度回调
++(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock;
+
+
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 @property(nonatomic) BOOL shouldShowHudView;
