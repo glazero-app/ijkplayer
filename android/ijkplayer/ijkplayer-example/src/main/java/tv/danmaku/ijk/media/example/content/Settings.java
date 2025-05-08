@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.example.application;
+package tv.danmaku.ijk.media.example.content;
 
 import android.content.Context;
 import android.content.SharedPreferences;

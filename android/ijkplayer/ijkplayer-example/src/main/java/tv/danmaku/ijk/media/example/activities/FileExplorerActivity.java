@@ -29,7 +29,7 @@ import java.io.IOException;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.AppActivity;
-import tv.danmaku.ijk.media.example.application.Settings;
+import tv.danmaku.ijk.media.example.content.Settings;
 import tv.danmaku.ijk.media.example.eventbus.FileExplorerEvents;
 import tv.danmaku.ijk.media.example.fragments.FileListFragment;
 
