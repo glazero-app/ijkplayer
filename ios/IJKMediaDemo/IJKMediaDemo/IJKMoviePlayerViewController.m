@@ -126,6 +126,9 @@
         NSLog(@"%@", outfilePath);
     });
     
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [IJKFFMoviePlayerController cancelDownloadVideo];
+    });
    
 }
 
@@ -211,10 +214,9 @@
         [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL
                                                                          fileURLWithPath:filePath]];
     } completionHandler:^(BOOL success, NSError * _Nullable error) {
-
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
         if (success) {
             NSLog(@"已将视频保存至相册");
-            [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
         } else {
             NSLog(@"未能保存视频到相册");
         }

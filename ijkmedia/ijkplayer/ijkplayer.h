@@ -235,5 +235,8 @@ void            ijkmp_global_set_record_fail_callback(ffp_record_fail_callback c
 ///   - progress_callback： 下载进度回调 0-100
 int ijkmp_download_video(const char *url, const char *output_file, void (^progress_callback)(int progress));
 
+/// 取消所有正在下载的视频
+void ijkmp_cancel_download_video(void);
+
 
 #endif

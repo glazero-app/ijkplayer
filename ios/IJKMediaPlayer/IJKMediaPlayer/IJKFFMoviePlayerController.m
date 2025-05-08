@@ -1842,6 +1842,9 @@ static void record_error(void *opaque ,int errorCode) {
     return  ret == 0;
 }
 
++(void)cancelDownloadVideo{
+    ijkmp_cancel_download_video();
+}
 
 
 

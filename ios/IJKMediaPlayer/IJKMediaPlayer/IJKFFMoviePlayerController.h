@@ -111,6 +111,8 @@ typedef enum IJKLogLevel {
 ///   - outputFile: 文件地址
 ///   - progressBlock: 下载进度回调
 +(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock;
+/// 取消正在下载的远端视频
++(void)cancelDownloadVideo;
 
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;

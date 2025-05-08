@@ -42,6 +42,8 @@
 #define MPST_RET_IF_EQ(real, expected) \
     MPST_RET_IF_EQ_INT(real, expected, EIJK_INVALID_STATE)
 
+static bool is_cancel_download = false;
+
 inline static void ijkmp_destroy(IjkMediaPlayer *mp)
 {
     if (!mp)
@@ -845,6 +847,7 @@ int ijkmp_stop_recording(IjkMediaPlayer *mp)
 }
 
 int ijkmp_download_video(const char *url, const char *output_file,  void (^progress_callback)(int progress)) {
+    is_cancel_download = false;
     AVFormatContext *input_format_context = NULL;
     AVFormatContext *output_format_context = NULL;
     AVOutputFormat *output_format = NULL;
@@ -965,6 +968,9 @@ int ijkmp_download_video(const char *url, const char *output_file,  void (^progr
     AVPacket packet;
     int64_t first_pts = AV_NOPTS_VALUE;
     while (1) {
+        if (is_cancel_download) {
+            return  -100;
+        }
         ret = av_read_frame(input_format_context, &packet);
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
@@ -1034,4 +1040,8 @@ int ijkmp_download_video(const char *url, const char *output_file,  void (^progr
         progress_callback(100);
     }
     return 0;
+}
+
+void ijkmp_cancel_download_video(void) {
+    is_cancel_download = true;
 }
