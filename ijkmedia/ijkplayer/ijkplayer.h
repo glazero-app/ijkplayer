@@ -234,19 +234,9 @@ void            ijkmp_global_set_record_fail_callback(ffp_record_fail_callback c
 ///   - url: 下载链接
 ///   - output_file: 下载文件路径需要包含文件名 example: test.mp4
 ///   - progress_callback： 下载进度回调 0-100
-int ijkmp_download_video(const char *url, const char *output_file, void (progress_callback)(int progress));
+int ijkmp_start_download(const char *url, const char *output_file, void (progress_callback)(int progress));
 
 /// 取消所有正在下载的视频
-void ijkmp_cancel_download_video(void);
-
-
-/**
- * 下载api定义
- * ijkmp_start_download(url, file, callback(url, progress))
- * ijkmp_pause_download(url)
- * ijkmp_resume_download(url)
- * ijkmp_stop_download(url)
- */
-
+int ijkmp_stop_download(const char *url);
 
 #endif

@@ -407,12 +407,11 @@ static void progress_callback(int progress) {
     printf("当前下载进度: %d%%\n", progress);
 }
 
-static jint
+static void
 IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring path)
 {
     MPTRACE("%s\n", __func__);
 
-    jint retval = 0;
     const char *c_url = NULL;
     c_url = (*env)->GetStringUTFChars(env, url, NULL );
     const char *c_path = NULL;
@@ -420,30 +419,7 @@ IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring pat
     MPTRACE("url=%s, path=%s", c_url, c_path);
 
     // TODO 自研 修改名称，开始、暂停、继续、停止
-    retval = ijkmp_download_video(c_url, c_path, progress_callback);
-    return retval;
-}
-
-static void
-IjkMediaPlayer_pauseDownload(JNIEnv *env, jobject thiz, jstring url)
-{
-    MPTRACE("%s\n", __func__);
-
-    const char *c_url = NULL;
-    c_url = (*env)->GetStringUTFChars(env, url, NULL );
-
-    ijkmp_cancel_download_video();
-}
-
-static void
-IjkMediaPlayer_resumeDownload(JNIEnv *env, jobject thiz, jstring url)
-{
-    MPTRACE("%s\n", __func__);
-
-    const char *c_url = NULL;
-    c_url = (*env)->GetStringUTFChars(env, url, NULL );
-
-    ijkmp_cancel_download_video();
+    ijkmp_start_download(c_url, c_path, progress_callback);
 }
 
 static void
@@ -454,7 +430,7 @@ IjkMediaPlayer_stopDownload(JNIEnv *env, jobject thiz, jstring url)
     const char *c_url = NULL;
     c_url = (*env)->GetStringUTFChars(env, url, NULL );
 
-    ijkmp_cancel_download_video();
+    ijkmp_stop_download(c_url);
 }
 
 static void
@@ -1252,8 +1228,6 @@ static JNINativeMethod g_methods[] = {
     { "_stopRecord",            "()V",      (void *) IjkMediaPlayer_stopRecord },
     { "_isRecording",           "()Z",      (void *) IjkMediaPlayer_isRecording },
     { "_startDownload",         "(Ljava/lang/String;Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startDownload },
-    { "_pauseDownload",         "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_pauseDownload },
-    { "_resumeDownload",        "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_resumeDownload },
     { "_stopDownload",          "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_stopDownload },
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },

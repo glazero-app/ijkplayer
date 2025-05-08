@@ -707,20 +707,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void _startDownload(String url, String filePath) throws IllegalStateException;
 
     @Override
-    public void pauseDownload(String url, String filePath) throws IllegalStateException {
-        _pauseDownload(url);
-    }
-
-    private native void _pauseDownload(String url) throws IllegalStateException;
-
-    @Override
-    public void resumeDownload(String url, String filePath) throws IllegalStateException {
-        _resumeDownload(url);
-    }
-
-    private native void _resumeDownload(String url) throws IllegalStateException;
-
-    @Override
     public void stopDownload(String url) throws IllegalStateException {
         _stopDownload(url);
     }

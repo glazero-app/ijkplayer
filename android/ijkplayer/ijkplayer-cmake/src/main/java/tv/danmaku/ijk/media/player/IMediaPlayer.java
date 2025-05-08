@@ -115,10 +115,6 @@ public interface IMediaPlayer {
 
     void startDownload(String url, String filePath) throws IllegalStateException;
 
-    void pauseDownload(String url, String filePath) throws IllegalStateException;
-
-    void resumeDownload(String url, String filePath) throws IllegalStateException;
-
     void stopDownload(String url) throws IllegalStateException;
 
     void release();
