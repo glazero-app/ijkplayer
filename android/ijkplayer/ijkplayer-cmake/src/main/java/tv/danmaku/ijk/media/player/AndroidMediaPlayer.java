@@ -272,6 +272,11 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void setDownloadListener(OnDownloadListener listener) {
+
+    }
+
+    @Override
     public void release() {
         mIsReleased = true;
         mInternalMediaPlayer.release();

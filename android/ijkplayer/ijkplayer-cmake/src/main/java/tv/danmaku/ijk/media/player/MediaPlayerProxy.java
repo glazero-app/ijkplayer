@@ -168,6 +168,11 @@ public class MediaPlayerProxy implements IMediaPlayer {
     }
 
     @Override
+    public void setDownloadListener(OnDownloadListener listener) {
+
+    }
+
+    @Override
     public void release() {
         mBackEndMediaPlayer.release();
     }

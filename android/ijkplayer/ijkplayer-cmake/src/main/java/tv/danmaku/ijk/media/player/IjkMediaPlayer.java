@@ -169,6 +169,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private String mDataSource;
 
+    private OnDownloadListener mDownloadListener;
+
     /**
      * Default library loader
      * Load them by yourself, if your libraries are not installed at default place.
@@ -712,6 +714,17 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     private native void _stopDownload(String url) throws IllegalStateException;
+
+    @Override
+    public void setDownloadListener(OnDownloadListener listener) {
+        mDownloadListener = listener;
+    }
+
+    public void updateProgress(String url, int progress) {
+        if (mDownloadListener != null) {
+            mDownloadListener.onProgress(url, progress);
+        }
+    }
 
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is

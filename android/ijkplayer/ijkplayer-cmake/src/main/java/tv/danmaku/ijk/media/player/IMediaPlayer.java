@@ -117,6 +117,8 @@ public interface IMediaPlayer {
 
     void stopDownload(String url) throws IllegalStateException;
 
+    void setDownloadListener(OnDownloadListener listener);
+
     void release();
 
     void reset();
@@ -170,6 +172,10 @@ public interface IMediaPlayer {
 
     interface OnSeekCompleteListener {
         void onSeekComplete(IMediaPlayer mp);
+    }
+
+    interface OnDownloadListener {
+        void onProgress(String url, int progress);
     }
 
     interface OnVideoSizeChangedListener {

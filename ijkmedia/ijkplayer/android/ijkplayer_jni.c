@@ -418,7 +418,6 @@ IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring pat
     c_path = (*env)->GetStringUTFChars(env, path, NULL );
     MPTRACE("url=%s, path=%s", c_url, c_path);
 
-    // TODO 自研 修改名称，开始、暂停、继续、停止
     ijkmp_start_download(c_url, c_path, progress_callback);
 }
 
