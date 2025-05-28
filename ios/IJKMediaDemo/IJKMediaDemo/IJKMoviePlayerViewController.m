@@ -114,21 +114,21 @@
     [self.view addSubview:self.mediaControl];
     self.mediaControl.delegatePlayer = self.player;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
-        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv";
-        NSString *uuid = [[NSUUID UUID] UUIDString];
-        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
-        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath progress:^(int progress) {
-            NSLog(@"当前下载进度--->%d",progress);
-        }];
-        [self saveFileToPhotoLibrary:outfilePath];
-        NSLog(@"%@", outfilePath);
-    });
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+//        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
+//        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv";
+//        NSString *uuid = [[NSUUID UUID] UUIDString];
+//        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+//        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath progress:^(int progress) {
+//            NSLog(@"当前下载进度--->%d",progress);
+//        }];
+//        [self saveFileToPhotoLibrary:outfilePath];
+//        NSLog(@"%@", outfilePath);
+//    });
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [IJKFFMoviePlayerController cancelDownloadVideo];
-    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [IJKFFMoviePlayerController cancelDownloadVideo];
+//    });
    
 }
 
@@ -198,6 +198,10 @@
     if (![self.player isRecording] && [self.player isPlaying]) {
         [self.player startRecordWithFileName:self->filePath recordFail:^(int errorCode) {
             NSLog(@"%d", errorCode);
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.beginRecordButton.title = @"开始录制";
+            });
         }];
         }
 }

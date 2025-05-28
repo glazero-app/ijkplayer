@@ -26,6 +26,7 @@
 @property(atomic,strong) NSURL *url;
 @property(strong,nonatomic) NSString* manifest;
 @property(atomic, retain) id<IJKMediaPlayback> player;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *beginRecordButton;
 
 - (id)initWithURL:(NSURL *)url;
 - (id)initWithManifest:(NSString*)manifest_string;

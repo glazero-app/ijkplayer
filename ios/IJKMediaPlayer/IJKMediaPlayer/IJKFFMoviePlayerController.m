@@ -1836,14 +1836,15 @@ static void record_error(void *opaque ,int errorCode) {
 +(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock{
     const char *cUrl = [url UTF8String];
     const char *cOutputFile = [outputFile UTF8String];
-       int ret = ijkmp_download_video(cUrl, cOutputFile, ^(int progress){
+    int ret = ijkmp_start_download(cUrl, cOutputFile, ^(int progress){
         progressBlock(progress);
     });
     return  ret == 0;
 }
 
 +(void)cancelDownloadVideo{
-    ijkmp_cancel_download_video();
+    
+    ijkmp_stop_download(NULL);
 }
 
 

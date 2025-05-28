@@ -9,6 +9,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="IJKVideoViewController">
             <connections>
+                <outlet property="beginRecordButton" destination="hpK-Ob-7Cx" id="gTq-tj-hfM"/>
                 <outlet property="mediaControl" destination="6" id="24"/>
                 <outlet property="view" destination="1" id="53"/>
             </connections>
