@@ -110,7 +110,7 @@ typedef enum IJKLogLevel {
 ///   - url: 视频链接
 ///   - outputFile: 文件地址
 ///   - progressBlock: 下载进度回调
-+(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock;
++(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile cookieString:(NSString *)cookieString progress:(void (^)(int progress))progressBlock;
 /// 取消正在下载的远端视频
 +(void)cancelDownloadVideo;
 

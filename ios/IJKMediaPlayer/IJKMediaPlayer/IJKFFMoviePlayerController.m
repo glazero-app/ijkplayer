@@ -1833,10 +1833,11 @@ static void record_error(void *opaque ,int errorCode) {
     }
 }
 
-+(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile progress:(void (^)(int progress))progressBlock{
++(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile cookieString:(NSString *)cookieString progress:(void (^)(int))progressBlock {
     const char *cUrl = [url UTF8String];
     const char *cOutputFile = [outputFile UTF8String];
-    int ret = ijkmp_start_download(cUrl, cOutputFile, ^(int progress){
+    const char *cookie = [cookieString UTF8String];
+    int ret = ijkmp_start_download(cUrl, cOutputFile, cookie,^(int progress){
         progressBlock(progress);
     });
     return  ret == 0;

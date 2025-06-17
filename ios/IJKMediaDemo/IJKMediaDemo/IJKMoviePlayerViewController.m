@@ -114,17 +114,18 @@
     [self.view addSubview:self.mediaControl];
     self.mediaControl.delegatePlayer = self.player;
     
-//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-//        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
-//        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv";
-//        NSString *uuid = [[NSUUID UUID] UUIDString];
-//        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
-//        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath progress:^(int progress) {
-//            NSLog(@"当前下载进度--->%d",progress);
-//        }];
-//        [self saveFileToPhotoLibrary:outfilePath];
-//        NSLog(@"%@", outfilePath);
-//    });
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
+        filePath = @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110000015/test/prog_index.m3u8";
+        NSString *uuid = [[NSUUID UUID] UUIDString];
+        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+        NSString * cookieString = @"Cookie:AWSALB=UdEy18YS1ti/5zRTHXFAK3YH+niVuEMfH/3j1lB7JYMHh9Ps50gbe6Gs6hnCqTGqsVJZTkNpQpI+0VCKHtJBW0M6VordMFm9+xci07Wb6yRa8fk1g3rvyPtU/g7S; AWSALBCORS=UdEy18YS1ti/5zRTHXFAK3YH+niVuEMfH/3j1lB7JYMHh9Ps50gbe6Gs6hnCqTGqsVJZTkNpQpI+0VCKHtJBW0M6VordMFm9+xci07Wb6yRa8fk1g3rvyPtU/g7S; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMDAwMTUvdGVzdC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUwMTU1ODA2fX19XX0_; CloudFront-Signature=0OO30uDE2qQrbEjHNBbyHeCcVPGHrL1lqKcqFfHjl8OppKze119IzHUVtPcFF4uaZ4BmCcHNjwEJ3MvmdEqJUumQQ7uG4n3JKMQ8MfWwAu81nhP1DMwd-~MX-WCJ-ThVF1pNK4fZglqf4LvkhRz-8oMc0ct~39TTIeODbxpUdKP31HOoS1vDeLb4FVRqF-4ug5zU~ECnJEXbpEsK3gMVZTTA68Pd4nY7WGNXrn7T9c9pbJVA8fuoEz3ebO21-OHm37lauHiZxWzw3vvDNQB2lgDbYLpJZ06IegOHwo0LVJBMARa~WzZNN7LbUVeHsHy3ebwVI73aayy768szZOGNRQ__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
+        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
+            NSLog(@"当前下载进度--->%d",progress);
+        }];
+        [self saveFileToPhotoLibrary:outfilePath];
+        NSLog(@"%@", outfilePath);
+    });
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [IJKFFMoviePlayerController cancelDownloadVideo];

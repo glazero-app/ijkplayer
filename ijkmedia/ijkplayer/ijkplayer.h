@@ -233,9 +233,9 @@ void            ijkmp_global_set_record_fail_callback(ffp_record_fail_callback c
 /// - Parameters:
 ///   - url: 下载链接
 ///   - output_file: 下载文件路径需要包含文件名 example: test.mp4
+///   - cookie: header内的cookie信息  格式为 Cookie:AWSALB=UdEy1
 ///   - progress_callback： 下载进度回调 0-100
-int ijkmp_start_download(const char *url, const char *output_file, void (progress_callback)(int progress));
-
+int ijkmp_start_download(const char *url, const char *output_file, const char *cookie, void (progress_callback)(int progress));
 /// 取消所有正在下载的视频
 int ijkmp_stop_download(const char *url);
 

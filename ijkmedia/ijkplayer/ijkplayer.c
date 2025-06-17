@@ -846,7 +846,7 @@ int ijkmp_stop_recording(IjkMediaPlayer *mp)
     return retval;
 }
 
-int ijkmp_start_download(const char *url, const char *output_file,  void (progress_callback)(int progress)) {
+int ijkmp_start_download(const char *url, const char *output_file, const char *cookie, void (progress_callback)(int progress)) {
     is_cancel_download = false;
     AVFormatContext *input_format_context = NULL;
     AVFormatContext *output_format_context = NULL;
@@ -863,9 +863,10 @@ int ijkmp_start_download(const char *url, const char *output_file,  void (progre
 
     // 初始化 FFmpeg 库
     avformat_network_init();
-
     // 打开输入网络流
-    ret = avformat_open_input(&input_format_context, url, NULL, NULL);
+    AVDictionary *headers = NULL;
+    av_dict_set(&headers, "headers", cookie, 0);
+    ret = avformat_open_input(&input_format_context, url, NULL, &headers);
     if (ret < 0) {
         fprintf(stderr, "无法打开输入流: %s\n", av_err2str(ret));
         return ret;
@@ -972,6 +973,7 @@ int ijkmp_start_download(const char *url, const char *output_file,  void (progre
             return  -100;
         }
         ret = av_read_frame(input_format_context, &packet);
+        total_size += packet.size;
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
                 break;
@@ -992,7 +994,7 @@ int ijkmp_start_download(const char *url, const char *output_file,  void (progre
         if (total_size > 0) {
             if (progress_callback) {
                 int progress = (((double)downloaded_size / total_size) * 100);
-                if (oldProgress != progress) {
+                if (oldProgress < progress) {
                     progress_callback(progress);
                     oldProgress = progress;
                 }
@@ -1036,6 +1038,9 @@ int ijkmp_start_download(const char *url, const char *output_file,  void (progre
     if (output_format_context)
         avformat_free_context(output_format_context);
     av_freep(&stream_mapping);
+    if (headers) {
+        av_dict_free(&headers);
+    }
     if (progress_callback) {
         progress_callback(100);
     }
