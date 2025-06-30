@@ -638,10 +638,15 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                }
              #pragma  mark - 录制插入
                if (ffp->is_record) { // 可以录制时，写入文件
-                   if (0 != ffp_record_file(ffp, &pkt)) {
-                       ffp->record_error = 1;
-                       ffp_stop_recording_l(ffp);
-                       printf("avcodec_send_packet stop\n");
+                   if (d->avctx->codec_type == AVMEDIA_TYPE_VIDEO && (pkt.flags & AV_PKT_FLAG_KEY)) {//首帧为I帧才开始录制
+                       ffp ->has_found_keyframe = 1;
+                   }
+                   if (ffp -> has_found_keyframe == 1) {
+                       if ( 0 != ffp_record_file(ffp, &pkt)) {
+                           ffp->record_error = 1;
+                           ffp_stop_recording_l(ffp);
+                           printf("avcodec_send_packet stop\n");
+                       }
                    }
                }
         
@@ -5073,7 +5078,7 @@ int ffp_start_recording_l(FFPlayer *ffp, const char *file_name) {
     ffp->m_ofmt = NULL;
     ffp->is_record = 0;
     ffp->record_error = 0;
-    
+    ffp->has_found_keyframe = 0;
     if (!file_name || !strlen(file_name)) {
         av_log(ffp, AV_LOG_ERROR, "filename is invalid");
         goto end;

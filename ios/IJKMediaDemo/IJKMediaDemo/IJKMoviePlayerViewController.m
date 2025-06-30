@@ -104,33 +104,39 @@
         [options setFormatOptionValue:self.manifest     forKey:@"manifest_string"];
     }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
+    NSLog(@"%@FFP_MSG_初始化ijk播放器", [self currentDateString]);
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
-    self.player.shouldAutoplay = NO;
+    self.player.shouldAutoplay = YES;
     [self.player setPauseInBackground:YES];
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
     self.mediaControl.delegatePlayer = self.player;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
-        filePath = @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110000015/test/prog_index.m3u8";
-        NSString *uuid = [[NSUUID UUID] UUIDString];
-        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
-        NSString * cookieString = @"Cookie:AWSALB=UdEy18YS1ti/5zRTHXFAK3YH+niVuEMfH/3j1lB7JYMHh9Ps50gbe6Gs6hnCqTGqsVJZTkNpQpI+0VCKHtJBW0M6VordMFm9+xci07Wb6yRa8fk1g3rvyPtU/g7S; AWSALBCORS=UdEy18YS1ti/5zRTHXFAK3YH+niVuEMfH/3j1lB7JYMHh9Ps50gbe6Gs6hnCqTGqsVJZTkNpQpI+0VCKHtJBW0M6VordMFm9+xci07Wb6yRa8fk1g3rvyPtU/g7S; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMDAwMTUvdGVzdC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUwMTU1ODA2fX19XX0_; CloudFront-Signature=0OO30uDE2qQrbEjHNBbyHeCcVPGHrL1lqKcqFfHjl8OppKze119IzHUVtPcFF4uaZ4BmCcHNjwEJ3MvmdEqJUumQQ7uG4n3JKMQ8MfWwAu81nhP1DMwd-~MX-WCJ-ThVF1pNK4fZglqf4LvkhRz-8oMc0ct~39TTIeODbxpUdKP31HOoS1vDeLb4FVRqF-4ug5zU~ECnJEXbpEsK3gMVZTTA68Pd4nY7WGNXrn7T9c9pbJVA8fuoEz3ebO21-OHm37lauHiZxWzw3vvDNQB2lgDbYLpJZ06IegOHwo0LVJBMARa~WzZNN7LbUVeHsHy3ebwVI73aayy768szZOGNRQ__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
-        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
-            NSLog(@"当前下载进度--->%d",progress);
-        }];
-        [self saveFileToPhotoLibrary:outfilePath];
-        NSLog(@"%@", outfilePath);
-    });
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+//        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
+//        filePath = @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110018631/1751075994099/playlist.m3u8";
+//        NSString *uuid = [[NSUUID UUID] UUIDString];
+//        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+//        NSString * cookieString = @"Cookie:AWSALB=Po3IakIsANRvY4ggqxbKEVVlojMwEKmGUmXN6Ap/vEqTQ0SPRkOnvFdtz+Q7zjJwDpUR/CEn6BzwnyaC4KNilIL6D6TrXiq1aRqID+wbMnrFCl7z22lUO0a/g2oD; AWSALBCORS=Po3IakIsANRvY4ggqxbKEVVlojMwEKmGUmXN6Ap/vEqTQ0SPRkOnvFdtz+Q7zjJwDpUR/CEn6BzwnyaC4KNilIL6D6TrXiq1aRqID+wbMnrFCl7z22lUO0a/g2oD; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTg2MzEvMTc1MTA3NTk5NDA5OS8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUxMDg0NjQxfX19XX0_; CloudFront-Signature=zqT5DJLfZnTOitZTv4Kjwk1hOIgeKLBeFi7nKXo9zd8Le1iYiGmfmN6ImJTf2KA9hiYFE~KK5RLWLVRG-YkIytSOscyAt3PHzStgcTXh86nG2i2~cgAZpWG~RGULxKm~79ueQJakY-u0Ac5hlnqV8Wsg62ImxEjo4xvdXOfT64GPV05pJomvffnpE4cuL1xyl7cx0oaUEws5om06KQ5lZQg8jetGC1ozMJqzbPul8dgZT0ZHk~BUo43HqFqxNIMGrN0i53-ADkDPDh300Cpw~zn8a6uJL304kA6eBJ0DvJVaGJp1NbJQV6wxIAwx50eJ9yOA7iMzGXtrcr6vmNIS9w__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
+//        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
+//            NSLog(@"当前下载进度--->%d",progress);
+//        }];
+//        [self saveFileToPhotoLibrary:outfilePath];
+//        NSLog(@"%@", outfilePath);
+//    });
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [IJKFFMoviePlayerController cancelDownloadVideo];
 //    });
    
+}
+- (NSString *)currentDateString {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS   ";
+    return  [formatter stringFromDate:[NSDate date]];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
