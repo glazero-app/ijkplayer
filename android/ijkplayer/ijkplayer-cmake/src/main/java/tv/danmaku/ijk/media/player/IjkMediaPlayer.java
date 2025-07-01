@@ -681,7 +681,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public native long getDuration();
 
     @Override
-    public void startRecord(String filePath) {
+    public void startRecord(String filePath) throws IllegalStateException {
         _startRecord(filePath);
     }
 
