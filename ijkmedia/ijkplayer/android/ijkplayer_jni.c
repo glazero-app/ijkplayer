@@ -408,7 +408,7 @@ static void progress_callback(int progress) {
 }
 
 static void
-IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring path)
+IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring path, jstring cookie)
 {
     MPTRACE("%s\n", __func__);
 
@@ -416,9 +416,11 @@ IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring pat
     c_url = (*env)->GetStringUTFChars(env, url, NULL );
     const char *c_path = NULL;
     c_path = (*env)->GetStringUTFChars(env, path, NULL );
-    MPTRACE("url=%s, path=%s", c_url, c_path);
+    const char *c_cookie = NULL;
+    c_cookie = (*env)->GetStringUTFChars(env, cookie, NULL );
+    MPTRACE("url=%s, path=%s, cookie=%s", c_url, c_path, c_cookie);
 
-    ijkmp_start_download(c_url, c_path, progress_callback);
+    ijkmp_start_download(c_url, c_path, c_cookie, progress_callback);
 }
 
 static void
@@ -1226,7 +1228,7 @@ static JNINativeMethod g_methods[] = {
     { "_startRecord",           "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startRecord },
     { "_stopRecord",            "()V",      (void *) IjkMediaPlayer_stopRecord },
     { "_isRecording",           "()Z",      (void *) IjkMediaPlayer_isRecording },
-    { "_startDownload",         "(Ljava/lang/String;Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startDownload },
+    { "_startDownload",         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",(void *) IjkMediaPlayer_startDownload },
     { "_stopDownload",          "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_stopDownload },
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },

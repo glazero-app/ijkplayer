@@ -173,7 +173,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mIvDownload.setOnClickListener(view -> {
             String path = "/sdcard/DCIM/gzplayer/";
             String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
-            mVideoView.startDownload(mVideoPath, name);
+            mVideoView.startDownload(mVideoPath, name, "");
         });
     }
 

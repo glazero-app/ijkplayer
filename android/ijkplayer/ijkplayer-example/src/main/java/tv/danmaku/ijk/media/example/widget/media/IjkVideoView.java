@@ -913,9 +913,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return false;
     }
 
-    public void startDownload(String url, String path) {
+    public void startDownload(String url, String path, String cookie) {
         if (mMediaPlayer != null)
-            mMediaPlayer.startDownload(url, path);
+            mMediaPlayer.startDownload(url, path, "Cookies:" + cookie);
     }
 
     public void stopDownload(String url) {

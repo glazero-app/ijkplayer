@@ -113,7 +113,7 @@ public interface IMediaPlayer {
 
     boolean isRecording();
 
-    void startDownload(String url, String filePath) throws IllegalStateException;
+    void startDownload(String url, String filePath, String cookies) throws IllegalStateException;
 
     void stopDownload(String url) throws IllegalStateException;
 

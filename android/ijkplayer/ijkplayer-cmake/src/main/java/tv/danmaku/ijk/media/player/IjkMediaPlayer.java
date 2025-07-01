@@ -702,11 +702,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native boolean _isRecording();
 
     @Override
-    public void startDownload(String url, String filePath) throws IllegalStateException {
-        _startDownload(url, filePath);
+    public void startDownload(String url, String filePath, String cookies) throws IllegalStateException {
+        _startDownload(url, filePath, cookies);
     }
 
-    private native void _startDownload(String url, String filePath) throws IllegalStateException;
+    private native void _startDownload(String url, String filePath, String cookies) throws IllegalStateException;
 
     @Override
     public void stopDownload(String url) throws IllegalStateException {
