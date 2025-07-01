@@ -879,12 +879,10 @@ int ijkmp_start_download(const char *url, const char *output_file, const char *c
         avformat_close_input(&input_format_context);
         return ret;
     }
-
-    // 获取输入流的总大小
-    if (input_format_context->pb && input_format_context->pb->seekable & AVIO_SEEKABLE_NORMAL) {
-        total_size = avio_size(input_format_context->pb);
-    }
-
+    //下载进度调试
+    int64_t target_duration = input_format_context ->duration / 100 ; // 从 m3u8 解析或默认值
+    total_size = target_duration;
+    
     // 分配输出格式上下文
     avformat_alloc_output_context2(&output_format_context, NULL, NULL, output_file);
     if (!output_format_context) {
@@ -973,7 +971,6 @@ int ijkmp_start_download(const char *url, const char *output_file, const char *c
             return  -100;
         }
         ret = av_read_frame(input_format_context, &packet);
-        total_size += packet.size;
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
                 break;
@@ -989,11 +986,13 @@ int ijkmp_start_download(const char *url, const char *output_file, const char *c
             av_packet_unref(&packet);
             continue;
         }
-
-        downloaded_size += packet.size;
+        downloaded_size += packet.duration / 16.0;
         if (total_size > 0) {
             if (progress_callback) {
                 int progress = (((double)downloaded_size / total_size) * 100);
+                if (progress > 99) {
+                    progress = 99;
+                }
                 if (oldProgress < progress) {
                     progress_callback(progress);
                     oldProgress = progress;
@@ -1031,6 +1030,7 @@ int ijkmp_start_download(const char *url, const char *output_file, const char *c
     }
 
     // 释放资源
+    printf("当前下载进度 下载完成 downloadSize -> %lld, totalSize ->%lld\n", downloaded_size, total_size);
     if (input_format_context)
         avformat_close_input(&input_format_context);
     if (output_format_context && !(output_format->flags & AVFMT_NOFILE))
