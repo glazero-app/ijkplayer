@@ -33,6 +33,7 @@
 #import "NSString+IJKMedia.h"
 #import "ijkioapplication.h"
 #include "string.h"
+#include <ijkplayer/ff_download_video.h>
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001";
 
@@ -1844,17 +1845,19 @@ static void record_error(void *opaque ,int errorCode) {
     const char *cUrl = [url UTF8String];
     const char *cOutputFile = [outputFile UTF8String];
     const char *cookie = [cookieString UTF8String];
-    int ret = ijkmp_start_download(cUrl, cOutputFile, cookie,^(int progress){
+    int ret = ff_start_download(cUrl, cOutputFile, cookie, ^(int progress){
         progressBlock(progress);
     });
     return  ret == 0;
 }
 
-+(void)cancelDownloadVideo{
-    
-    ijkmp_stop_download(NULL);
++ (void)cancelDownloadVideo:(NSString *)url{
+    const char *cUrl = [url UTF8String];
+    ff_stop_download(cUrl);
 }
-
++(void)cleanAllDowloadTask{
+    ff_cleanup_download_system();
+}
 
 
 

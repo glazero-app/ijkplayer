@@ -112,7 +112,10 @@ typedef enum IJKLogLevel {
 ///   - progressBlock: 下载进度回调
 +(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile cookieString:(NSString *)cookieString progress:(void (^)(int progress))progressBlock;
 /// 取消正在下载的远端视频
-+(void)cancelDownloadVideo;
++(void)cancelDownloadVideo:(NSString *)url;
+
+/// 清除所有的下载任务
++(void)cleanAllDowloadTask;
 
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
