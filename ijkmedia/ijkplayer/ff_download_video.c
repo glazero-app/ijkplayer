@@ -308,7 +308,7 @@ cleanup:
 }
 
 // 启动下载
-int ff_start_download(const char* url, const char* output_file, const char* cookie,void (^progress_callback)(int progress)){
+int ff_start_download(const char* url, const char* output_file, const char* cookie,void (progress_callback)(int progress)){
     if (!g_downloadList) {
         ff_init_download_system();
     }

@@ -36,6 +36,7 @@
 #include "ffmpeg_api_jni.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
+#include "ijkplayer/ff_download_video.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediadef.h"
 #include "ijkavformat/ijkavformat.h"
@@ -420,7 +421,7 @@ IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring pat
     c_cookie = (*env)->GetStringUTFChars(env, cookie, NULL );
     MPTRACE("url=%s, path=%s, cookie=%s", c_url, c_path, c_cookie);
 
-    ijkmp_start_download(c_url, c_path, c_cookie, progress_callback);
+    ff_start_download(c_url, c_path, c_cookie, progress_callback);
 }
 
 static void
@@ -431,7 +432,7 @@ IjkMediaPlayer_stopDownload(JNIEnv *env, jobject thiz, jstring url)
     const char *c_url = NULL;
     c_url = (*env)->GetStringUTFChars(env, url, NULL );
 
-    ijkmp_stop_download(c_url);
+    ff_stop_download(c_url);
 }
 
 static void

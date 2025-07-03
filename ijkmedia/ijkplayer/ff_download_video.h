@@ -6,8 +6,9 @@
 //  Copyright © 2025 bilibili. All rights reserved.
 //
 
-#ifndef ff_download_video_h
-#define ff_download_video_h
+#ifndef FF_DOWNLOAD_VIDEO_H
+#define FF_DOWNLOAD_VIDEO_H
+
 #include <stdbool.h>
 #include <libavformat/avformat.h>
 #include <stdio.h>
@@ -29,7 +30,7 @@ typedef struct FFDownloadItem {
     int64_t total_size;
     int64_t downloaded_size;
     FFDownloadList* list;
-    void (^progress_callback)(int progress);
+    void (*progress_callback)(int progress);
 } FFDownloadItem;
 
 // 下载列表结构体
@@ -49,7 +50,7 @@ void ff_cleanup_download_system();
 ///   - output_file: 下载文件路径需要包含文件名 example: test.mp4
 ///   - cookie: header内的cookie信息  格式为 Cookie:AWSALB=UdEy1
 ///   - progress_callback： 下载进度回调 0-100
-int ff_start_download(const char* url, const char* output_file, const char* cookie,void (^progress_callback)(int progress));
+int ff_start_download(const char* url, const char* output_file, const char* cookie,void (progress_callback)(int progress));
 
 // 停止下载
 int ff_stop_download(const char* url);
@@ -61,6 +62,5 @@ int ff_get_download_progress(const char* url);
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* ff_download_video_h */
