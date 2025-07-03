@@ -638,10 +638,12 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                }
              #pragma  mark - 录制插入
                if (ffp->is_record) { // 可以录制时，写入文件
+                   printf("avcodec_send_packet codec_type:%d flags:%d\n", d->avctx->codec_type, (pkt.flags & AV_PKT_FLAG_KEY));
                    if (d->avctx->codec_type == AVMEDIA_TYPE_VIDEO && (pkt.flags & AV_PKT_FLAG_KEY)) {//首帧为I帧才开始录制
-                       ffp ->has_found_keyframe = 1;
+                       ffp -> has_found_keyframe = 1;
                    }
                    if (ffp -> has_found_keyframe == 1) {
+                       printf("avcodec_send_packet has_found_keyframe\n");
                        if ( 0 != ffp_record_file(ffp, &pkt)) {
                            ffp->record_error = 1;
                            ffp_stop_recording_l(ffp);
@@ -5071,6 +5073,7 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 //ff_play.c
 //插入录制方法
 int ffp_start_recording_l(FFPlayer *ffp, const char *file_name) {
+    av_log(ffp, AV_LOG_INFO, "ffp_start_recording_l");
     assert(ffp);
     VideoState *is = ffp->is;
     
@@ -5151,7 +5154,9 @@ int ffp_start_recording_l(FFPlayer *ffp, const char *file_name) {
     ffp->is_record = 1;
     ffp->record_error = 0;
     pthread_mutex_init(&ffp->record_mutex, NULL);
-    
+
+    av_log(ffp, AV_LOG_INFO, "ffp_start_recording_l success");
+
     return 0;
 end:
     ffp->record_error = 1;

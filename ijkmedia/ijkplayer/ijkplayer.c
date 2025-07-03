@@ -808,7 +808,8 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
     return -1;
 }
 
-int ijkmp_isRecording(IjkMediaPlayer *mp) {
+int ijkmp_is_recording(IjkMediaPlayer *mp) {
+    printf("ijkmp_is_recording=%d", mp->ffplayer->is_record);
     return mp->ffplayer->is_record;
 }
 

@@ -225,7 +225,7 @@ void ijkmp_set_subtitle_preference(IjkMediaPlayer *mp, IJKSDLSubtitlePreference*
 //ijkplayer.h
 int             ijkmp_start_recording(IjkMediaPlayer *mp, const char *filePath);
 int             ijkmp_stop_recording(IjkMediaPlayer *mp);
-int             ijkmp_isRecording(IjkMediaPlayer *mp);
+int             ijkmp_is_recording(IjkMediaPlayer *mp);
 void            ijkmp_global_set_record_fail_callback(ffp_record_fail_callback cb);
 
 

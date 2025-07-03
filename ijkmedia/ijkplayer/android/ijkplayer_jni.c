@@ -396,7 +396,7 @@ IjkMediaPlayer_isRecording(JNIEnv* env,jobject thiz)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: isPlaying: null mp", LABEL_RETURN);
 
-    retval = ijkmp_isRecording(mp) ? JNI_TRUE : JNI_FALSE;
+    retval = ijkmp_is_recording(mp) ? JNI_TRUE : JNI_FALSE;
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
