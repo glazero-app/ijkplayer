@@ -1829,7 +1829,7 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
     NSLog(@"start record fileName %@",fileName);
 }
 - (BOOL)isRecording {
-    return ijkmp_isRecording(_mediaPlayer);
+    return ijkmp_is_recording(_mediaPlayer);
 }
 
 
