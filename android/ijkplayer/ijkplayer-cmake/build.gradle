@@ -51,11 +51,13 @@ afterEvaluate {
                 groupId = _groupId
                 artifactId = _artifactId
                 version = _versionName
+                artifact("$buildDir/outputs/aar/ijkplayer.aar")
             }
             debug(MavenPublication) {
                 groupId = _groupId
                 artifactId = _artifactId
                 version = "${_versionName}.${_versionCode}-SNAPSHOT"
+                artifact("$buildDir/outputs/aar/ijkplayer.aar")
             }
         }
         repositories {
