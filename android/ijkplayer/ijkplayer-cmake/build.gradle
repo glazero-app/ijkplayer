@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
 }
 
 android {
@@ -8,9 +9,6 @@ android {
 
     defaultConfig {
         minSdk 21
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
 
         externalNativeBuild{
             cmake {
@@ -39,4 +37,43 @@ android {
 dependencies {
     compileOnly 'androidx.appcompat:appcompat:1.7.0'
     compileOnly 'com.google.android.material:material:1.12.0'
+}
+
+afterEvaluate {
+    def _groupId = "com.glazero.android"
+    def _artifactId = "sdk-player"
+    def _versionName = "1.0.0"
+    def _versionCode = "1002"
+
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = _groupId
+                artifactId = _artifactId
+                version = _versionName
+            }
+            debug(MavenPublication) {
+                groupId = _groupId
+                artifactId = _artifactId
+                version = "${_versionName}.${_versionCode}-SNAPSHOT"
+            }
+        }
+        repositories {
+            maven {
+                def isRelease = false
+                def taskNames = project.gradle.startParameter.taskNames
+                if (!taskNames.isEmpty()) {
+                    isRelease = taskNames.first().contains("Release")
+                }
+                url = isRelease ?
+                        uri("https://packages.aliyun.com/maven/repository/2075287-release-uz6THy/") :
+                        uri("https://packages.aliyun.com/maven/repository/2075287-snapshot-INVkYp/")
+
+                credentials {
+                    username = "601fc638f79db5b68adfc6ae"
+                    password = "HIHsMOkuZVte"
+                }
+            }
+        }
+    }
 }
