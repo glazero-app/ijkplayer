@@ -40,10 +40,10 @@ dependencies {
 }
 
 afterEvaluate {
-    def _groupId = "com.glazero.android"
+    def _groupId = "com.glazero.iot"
     def _artifactId = "sdk-player"
     def _versionName = "1.0.0"
-    def _versionCode = "1002"
+    def _versionCode = "1000"
 
     publishing {
         publications {
