@@ -30,7 +30,8 @@ typedef struct FFDownloadItem {
     int64_t total_size;
     int64_t downloaded_size;
     FFDownloadList* list;
-    void (*progress_callback)(int progress);
+    void (*progress_callback)(int progress, void* user_data);
+    void *user_data;  // Android回调Java层需要的
 } FFDownloadItem;
 
 // 下载列表结构体
@@ -50,7 +51,7 @@ void ff_cleanup_download_system();
 ///   - output_file: 下载文件路径需要包含文件名 example: test.mp4
 ///   - cookie: header内的cookie信息  格式为 Cookie:AWSALB=UdEy1
 ///   - progress_callback： 下载进度回调 0-100
-int ff_start_download(const char* url, const char* output_file, const char* cookie,void (progress_callback)(int progress));
+int ff_start_download(const char* url, const char* output_file, const char* cookie, void (*progress_cb)(int, void*), void *user_data);
 
 // 停止下载
 int ff_stop_download(const char* url);

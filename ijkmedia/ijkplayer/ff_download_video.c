@@ -78,7 +78,7 @@ static void ff_update_download_progress(const char* url, int progress) {
         if (index != -1) {
             g_downloadList->items[index].download_progress = progress;
             if (g_downloadList->items[index].progress_callback) {
-                g_downloadList->items[index].progress_callback(progress);
+                g_downloadList->items[index].progress_callback(progress, g_downloadList->items[index].user_data);
             }
         }
     }
@@ -299,7 +299,7 @@ cleanup:
             for (int j = i; j < item->list->size - 1; j++) {
                 item->list->items[j] = item->list->items[j + 1];
             }
-//            item->list->size--;
+            item->list->size--;
             break;
         }
     }
@@ -308,7 +308,7 @@ cleanup:
 }
 
 // 启动下载
-int ff_start_download(const char* url, const char* output_file, const char* cookie,void (progress_callback)(int progress)){
+int ff_start_download(const char* url, const char* output_file, const char* cookie, void (*progress_callback)(int, void*), void *user_data){
     if (!g_downloadList) {
         ff_init_download_system();
     }
@@ -337,6 +337,7 @@ int ff_start_download(const char* url, const char* output_file, const char* cook
     item->total_size = 0;
     item->downloaded_size = 0;
     item->progress_callback = progress_callback;
+    item->user_data = user_data;
     item->input_format_context = NULL;
     item->list = g_downloadList; // 保存列表指针
     g_downloadList->size++;

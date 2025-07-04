@@ -373,6 +373,7 @@ IjkMediaPlayer_startRecord(JNIEnv *env, jobject thiz, jstring path)
     JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: startRecord: path.string oom", LABEL_RETURN);
 
     ijkmp_start_recording(mp, c_path);
+    (*env)->ReleaseStringUTFChars(env, path, c_path);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);

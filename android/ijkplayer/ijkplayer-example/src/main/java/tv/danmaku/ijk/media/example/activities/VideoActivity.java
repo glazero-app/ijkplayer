@@ -17,6 +17,7 @@
 
 package tv.danmaku.ijk.media.example.activities;
 
+import android.animation.ValueAnimator;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -178,21 +179,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mIvDownload.setOnClickListener(view -> {
             String path = "/sdcard/DCIM/gzplayer/";
             String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
-            mVideoView.startDownload(mVideoPath, name, "");
-            mTvDownloadProgress.postDelayed(downloadRunnable, 0);
+            mVideoView.startDownload(mVideoPath, name, "", progress -> {
+                Log.i(TAG, "download progress: " + progress);
+                mTvDownloadProgress.setText(progress + "%");
+            });
         });
     }
-
-    private Runnable downloadRunnable = new Runnable() {
-        @Override
-        public void run() {
-            int progress = mVideoView.getDownloadProgress(mVideoPath);
-            mTvDownloadProgress.setText(progress + "%");
-            if (progress != 100) {
-                mTvDownloadProgress.postDelayed(downloadRunnable, 200);
-            }
-        }
-    };
 
     @Override
     public void onBackPressed() {
