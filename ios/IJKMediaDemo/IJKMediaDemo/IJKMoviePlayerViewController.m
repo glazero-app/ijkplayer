@@ -117,11 +117,11 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
-        filePath = @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110018062/1751456966261/playlist.m3u8";
+        filePath = @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110018332/1751436531409/playlist.m3u8";
         self -> filePath = filePath;
         NSString *uuid = [[NSUUID UUID] UUIDString];
         NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
-        NSString * cookieString = @"Cookie:AWSALB=q8awd7Lr5c+DEGTV+BRUEamv4xVL3stp+eJNDbPUrp02lsvTL/yPiSmucSJ+l1JI0Pe4bVGKcA97xjmjlT4ZMCqM5N4XzImVcUsUrV3YF0D75J1iot5IeMPDq7tp; AWSALBCORS=q8awd7Lr5c+DEGTV+BRUEamv4xVL3stp+eJNDbPUrp02lsvTL/yPiSmucSJ+l1JI0Pe4bVGKcA97xjmjlT4ZMCqM5N4XzImVcUsUrV3YF0D75J1iot5IeMPDq7tp; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTgwNjIvMTc1MTQ1Njk2NjI2MS8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUxNDY0MTI4fX19XX0_; CloudFront-Signature=dCNj4YYgfvlnJy5DY9ZFWJ4lboZe3rTQ8jSUd0vDFKjx2-8G4pHHUp1McpEzmmSKS8mlikkNwkp7I1ZRYAGzDuWSFy0gWoErMoJSQLmtPUViyjvYbHPDsIEJUP5FJaAZWT-WjgwSXJ2R0SCJ232QR423reo663oWEf-ph099TgyDpNy13~k9mRQuE6JCb4~Bz7JXfnufoywolZcW0aXPj7tlrf2qoTah03YA1h~KV4oUDaWDc9DvFolgoYrSV55DGFCvyhoV-45gC89BPi-OTZxBD-GxcSwsJVCoE-MwZTthVK~zmFMOVqNHbGgbEvhBLrFgt2EvK1FMDxxBJf7jXA__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
+        NSString * cookieString = @"Cookie:AWSALB=p3ZKE3pDDHDfDRXmB88PXAnvcEU92LvKvpz825PHsjLcburaPe1yEuVpLGxN+Vnhk+x16OhxxlhCuR5HgkS//W/4PmQcMlM+miL2IWpVN+X59WUVYafSzVQATVCz; AWSALBCORS=p3ZKE3pDDHDfDRXmB88PXAnvcEU92LvKvpz825PHsjLcburaPe1yEuVpLGxN+Vnhk+x16OhxxlhCuR5HgkS//W/4PmQcMlM+miL2IWpVN+X59WUVYafSzVQATVCz; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTgzMzIvMTc1MTQzNjUzMTQwOS8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUxNTk5ODczfX19XX0_; CloudFront-Signature=sl0PiiujZ~xNtGrUQfTO-1mbJiprL9IYZyl04wtRg~Aaqb4zE8yCxiNYLTFqVjv87LrapxHAVjoEC~56ubR7iLF2RrhKcDIwmFDaCf3bzVAskz2QYAel7ARwM9ZzUanJJMo5bV1nfYDGbTlDRNX1CpZpvgY4qtclZyvUPShKBOKvFj-6MrYbvYLop-Z5ekzMij5NMI8sHu~7VLIOlkQFQbceYd6ucNa6aLMgYVLAfuET343Lk3FONvMf3zGmxrr2Pb8CJ3p41obUIIbx~wkwBMJzItHQO3yAjGsQDWZEiSGSp6WoRhWKdXIsU6MT-fhinReOYWVcJxIxaO6~YUDv5g__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
         [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
             NSLog(@"当前下载进度--->%d",progress);
         }];
@@ -129,9 +129,9 @@
         NSLog(@"%@", outfilePath);
     });
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [IJKFFMoviePlayerController cleanAllDowloadTask];
-    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [IJKFFMoviePlayerController cleanAllDowloadTask];
+//    });
    
 }
 - (NSString *)currentDateString {

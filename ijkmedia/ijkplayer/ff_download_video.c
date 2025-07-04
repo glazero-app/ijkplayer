@@ -271,6 +271,7 @@ static int ff_download(const FFDownloadItem* item) {
         fprintf(stderr, "写入文件尾时出错\n");
     } else {
         ff_update_download_progress(item->url, 100); // 完成状态
+        ret = 0;
     }
 
 cleanup:
