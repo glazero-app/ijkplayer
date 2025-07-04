@@ -42,7 +42,7 @@ static void callback_context_release(JNIEnv *env, CallbackContext *ctx) {
 }
 
 static void download_progress_callback(int progress, void *user_data) {
-    MPTRACE("%s download_progress_callback=%d\n", __func__, progress);
+    MPTRACE("%s progress=%d\n", __func__, progress);
 
     CallbackContext *ctx = (CallbackContext *)user_data;
 
