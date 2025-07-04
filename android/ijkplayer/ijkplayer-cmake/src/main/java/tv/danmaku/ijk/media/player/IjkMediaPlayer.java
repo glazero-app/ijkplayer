@@ -169,32 +169,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private String mDataSource;
 
-    private OnDownloadListener mDownloadListener;
-
-    /**
-     * Default library loader
-     * Load them by yourself, if your libraries are not installed at default place.
-     */
-    private static final IjkLibLoader sLocalLibLoader = new IjkLibLoader() {
-        @Override
-        public void loadLibrary(String libName) throws UnsatisfiedLinkError, SecurityException {
-            System.loadLibrary(libName);
-        }
-    };
-
-    private static volatile boolean mIsLibLoaded = false;
-    public static void loadLibrariesOnce(IjkLibLoader libLoader) {
-        synchronized (IjkMediaPlayer.class) {
-            if (!mIsLibLoaded) {
-                if (libLoader == null)
-                    libLoader = sLocalLibLoader;
-
-                libLoader.loadLibrary("ijkplayer");
-                mIsLibLoaded = true;
-            }
-        }
-    }
-
     private static volatile boolean mIsNativeInitialized = false;
     private static void initNativeOnce() {
         synchronized (IjkMediaPlayer.class) {
@@ -215,7 +189,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * </p>
      */
     public IjkMediaPlayer() {
-        this(sLocalLibLoader);
+        this(IjkLoaderLibrary.sLocalLibLoader);
     }
 
     /**
@@ -228,7 +202,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     private void initPlayer(IjkLibLoader libLoader) {
-        loadLibrariesOnce(libLoader);
+        IjkLoaderLibrary.loadLibrariesOnce(libLoader);
         initNativeOnce();
 
         Looper looper;
@@ -700,31 +674,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     private native boolean _isRecording();
-
-    @Override
-    public void startDownload(String url, String filePath, String cookies) throws IllegalStateException {
-        _startDownload(url, filePath, cookies);
-    }
-
-    private native void _startDownload(String url, String filePath, String cookies) throws IllegalStateException;
-
-    @Override
-    public void stopDownload(String url) throws IllegalStateException {
-        _stopDownload(url);
-    }
-
-    private native void _stopDownload(String url) throws IllegalStateException;
-
-    @Override
-    public void setDownloadListener(OnDownloadListener listener) {
-        mDownloadListener = listener;
-    }
-
-    public void updateProgress(String url, int progress) {
-        if (mDownloadListener != null) {
-            mDownloadListener.onProgress(url, progress);
-        }
-    }
 
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is

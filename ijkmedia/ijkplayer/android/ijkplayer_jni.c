@@ -34,6 +34,7 @@
 #include "ijksdl/ijksdl_log.h"
 #include "../ff_ffplay.h"
 #include "ffmpeg_api_jni.h"
+#include "ff_download_jni.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
 #include "ijkplayer/ff_download_video.h"
@@ -402,37 +403,6 @@ IjkMediaPlayer_isRecording(JNIEnv* env,jobject thiz)
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     return retval;
-}
-
-static void progress_callback(int progress) {
-    printf("当前下载进度: %d%%\n", progress);
-}
-
-static void
-IjkMediaPlayer_startDownload(JNIEnv *env, jobject thiz, jstring url, jstring path, jstring cookie)
-{
-    MPTRACE("%s\n", __func__);
-
-    const char *c_url = NULL;
-    c_url = (*env)->GetStringUTFChars(env, url, NULL );
-    const char *c_path = NULL;
-    c_path = (*env)->GetStringUTFChars(env, path, NULL );
-    const char *c_cookie = NULL;
-    c_cookie = (*env)->GetStringUTFChars(env, cookie, NULL );
-    MPTRACE("url=%s, path=%s, cookie=%s", c_url, c_path, c_cookie);
-
-    ff_start_download(c_url, c_path, c_cookie, progress_callback);
-}
-
-static void
-IjkMediaPlayer_stopDownload(JNIEnv *env, jobject thiz, jstring url)
-{
-    MPTRACE("%s\n", __func__);
-
-    const char *c_url = NULL;
-    c_url = (*env)->GetStringUTFChars(env, url, NULL );
-
-    ff_stop_download(c_url);
 }
 
 static void
@@ -1229,8 +1199,6 @@ static JNINativeMethod g_methods[] = {
     { "_startRecord",           "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startRecord },
     { "_stopRecord",            "()V",      (void *) IjkMediaPlayer_stopRecord },
     { "_isRecording",           "()Z",      (void *) IjkMediaPlayer_isRecording },
-    { "_startDownload",         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",(void *) IjkMediaPlayer_startDownload },
-    { "_stopDownload",          "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_stopDownload },
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },
     { "setVolume",              "(FF)V",    (void *) IjkMediaPlayer_setVolume },
@@ -1282,6 +1250,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     FFmpegApi_global_init(env);
     int retval = JNI_OnLoad_SDL(vm, env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
+
+    FFDownloadManager_global_init(env);
 
     return JNI_VERSION_1_4;
 }

@@ -1,12 +1,11 @@
-<androidx.drawerlayout.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activities.VideoActivity"
     android:id="@+id/drawer_layout"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.VideoActivity">
 
     <!-- The main content view -->
     <FrameLayout
@@ -52,22 +51,32 @@
             android:id="@+id/iv_record"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginTop="70dp"
             android:layout_marginLeft="20dp"
-            android:src="@drawable/icon_record"/>
+            android:layout_marginTop="70dp"
+            android:src="@drawable/icon_record" />
 
         <ImageView
             android:id="@+id/iv_download"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginTop="70dp"
             android:layout_marginLeft="70dp"
-            android:src="@drawable/icon_download"/>
+            android:layout_marginTop="70dp"
+            android:src="@drawable/icon_download" />
+
+        <TextView
+            android:id="@+id/tv_download_progress"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="70dp"
+            android:gravity="center"
+            android:text="0%" />
 
     </FrameLayout>
 
     <!-- The navigation drawer -->
-    <FrameLayout android:id="@+id/right_drawer"
+    <FrameLayout
+        android:id="@+id/right_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="right"

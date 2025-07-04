@@ -39,8 +39,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import tv.danmaku.ijk.media.player.IjkLoaderLibrary;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.download.FFDownloadManager;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.content.Settings;
@@ -64,6 +67,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private ViewGroup mRightDrawer;
     private ImageView mIvRecord;
     private ImageView mIvDownload;
+    private TextView mTvDownloadProgress;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -136,11 +140,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
         mIvRecord = (ImageView) findViewById(R.id.iv_record);
         mIvDownload = (ImageView) findViewById(R.id.iv_download);
+        mTvDownloadProgress = (TextView) findViewById(R.id.tv_download_progress);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
         // init player
-        IjkMediaPlayer.loadLibrariesOnce(null);
+        IjkLoaderLibrary.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
 
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
@@ -174,8 +179,20 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             String path = "/sdcard/DCIM/gzplayer/";
             String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
             mVideoView.startDownload(mVideoPath, name, "");
+            mTvDownloadProgress.postDelayed(downloadRunnable, 0);
         });
     }
+
+    private Runnable downloadRunnable = new Runnable() {
+        @Override
+        public void run() {
+            int progress = mVideoView.getDownloadProgress(mVideoPath);
+            mTvDownloadProgress.setText(progress + "%");
+            if (progress != 100) {
+                mTvDownloadProgress.postDelayed(downloadRunnable, 200);
+            }
+        }
+    };
 
     @Override
     public void onBackPressed() {

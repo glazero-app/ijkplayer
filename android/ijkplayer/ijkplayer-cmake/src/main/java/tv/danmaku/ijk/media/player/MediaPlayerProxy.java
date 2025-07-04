@@ -158,21 +158,6 @@ public class MediaPlayerProxy implements IMediaPlayer {
     }
 
     @Override
-    public void startDownload(String url, String filePath, String cookies) throws IllegalStateException {
-
-    }
-
-    @Override
-    public void stopDownload(String url) throws IllegalStateException {
-
-    }
-
-    @Override
-    public void setDownloadListener(OnDownloadListener listener) {
-
-    }
-
-    @Override
     public void release() {
         mBackEndMediaPlayer.release();
     }

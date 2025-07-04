@@ -119,7 +119,7 @@ static int ff_download(const FFDownloadItem* item) {
     ret = avformat_find_stream_info(input_format_context, NULL);
     if (ret < 0) {
         fprintf(stderr, "无法查找流信息: %s\n", av_err2str(ret));
-        ff_update_download_progress(item->url, -1);
+        ff_update_download_progress(item->url, -2);
         goto cleanup;
     }
     
@@ -134,7 +134,7 @@ static int ff_download(const FFDownloadItem* item) {
     avformat_alloc_output_context2(&output_format_context, NULL, NULL, item->output_file_url);
     if (!output_format_context) {
         fprintf(stderr, "无法创建输出上下文\n");
-        ff_update_download_progress(item->url, -1);
+        ff_update_download_progress(item->url, -3);
         goto cleanup;
     }
     output_format = output_format_context->oformat;
@@ -143,7 +143,7 @@ static int ff_download(const FFDownloadItem* item) {
     stream_mapping = av_mallocz_array(stream_mapping_size, sizeof(*stream_mapping));
     if (!stream_mapping) {
         fprintf(stderr, "无法分配流映射数组\n");
-        ff_update_download_progress(item->url, -1);
+        ff_update_download_progress(item->url, -4);
         goto cleanup;
     }
 
@@ -165,14 +165,14 @@ static int ff_download(const FFDownloadItem* item) {
         out_stream = avformat_new_stream(output_format_context, NULL);
         if (!out_stream) {
             fprintf(stderr, "无法分配输出流\n");
-            ff_update_download_progress(item->url, -1);
+            ff_update_download_progress(item->url, -5);
             goto cleanup;
         }
 
         // 复制输入流的编解码器参数到输出流
         if (avcodec_parameters_copy(out_stream->codecpar, in_codecpar) < 0) {
             fprintf(stderr, "无法复制编解码器参数\n");
-            ff_update_download_progress(item->url, -1);
+            ff_update_download_progress(item->url, -6);
             goto cleanup;
         }
         out_stream->codecpar->codec_tag = 0;
@@ -189,7 +189,7 @@ static int ff_download(const FFDownloadItem* item) {
     if (!(output_format->flags & AVFMT_NOFILE)) {
         if (avio_open(&output_format_context->pb, item->output_file_url, AVIO_FLAG_WRITE) < 0) {
             fprintf(stderr, "无法打开输出文件: %s\n", av_err2str(ret));
-            ff_update_download_progress(item->url, -1);
+            ff_update_download_progress(item->url, -7);
             goto cleanup;
         }
     }
@@ -197,7 +197,7 @@ static int ff_download(const FFDownloadItem* item) {
     // 写入文件头
     if (avformat_write_header(output_format_context, NULL) < 0) {
         fprintf(stderr, "打开输出文件时出错\n");
-        ff_update_download_progress(item->url, -1);
+        ff_update_download_progress(item->url, -8);
         goto cleanup;
     }
 
@@ -208,7 +208,7 @@ static int ff_download(const FFDownloadItem* item) {
     while (1) {
         if (item->is_cancel_download) {
             fprintf(stderr, "下载已取消: %s\n", item->url);
-            ff_update_download_progress(item->url, -2); // 取消状态
+            ff_update_download_progress(item->url, -9); // 取消状态
             break;
         }
         
@@ -218,7 +218,7 @@ static int ff_download(const FFDownloadItem* item) {
                 break;
             } else {
                 fprintf(stderr, "读取帧时出错: %s\n", av_err2str(ret));
-                ff_update_download_progress(item->url, -1);
+                ff_update_download_progress(item->url, -10);
                 break;
             }
         }
@@ -259,7 +259,7 @@ static int ff_download(const FFDownloadItem* item) {
         ret = av_interleaved_write_frame(output_format_context, &packet);
         if (ret < 0) {
             fprintf(stderr, "混合数据包时出错: %s\n", av_err2str(ret));
-            ff_update_download_progress(item->url, -1);
+            ff_update_download_progress(item->url, -11);
             av_packet_unref(&packet);
             break;
         }
@@ -299,7 +299,7 @@ cleanup:
             for (int j = i; j < item->list->size - 1; j++) {
                 item->list->items[j] = item->list->items[j + 1];
             }
-            item->list->size--;
+//            item->list->size--;
             break;
         }
     }
@@ -326,7 +326,7 @@ int ff_start_download(const char* url, const char* output_file, const char* cook
         g_downloadList->capacity *= 2;
         g_downloadList->items = (FFDownloadItem*)realloc(g_downloadList->items, g_downloadList->capacity * sizeof(FFDownloadItem));
     }
-    
+
     // 初始化新下载项
     FFDownloadItem* item = &g_downloadList->items[g_downloadList->size];
     item->url = url;
@@ -342,9 +342,8 @@ int ff_start_download(const char* url, const char* output_file, const char* cook
     g_downloadList->size++;
 
     // 开始下载
-    int ret = ff_download(item);
-    
-    
+    ff_download(item);
+    int ret = 0;
     return ret;
 }
 
@@ -354,8 +353,8 @@ int ff_stop_download(const char* url) {
     if (!g_downloadList || !url) return -1;
     
     int index = ff_find_download_item_index(url);
-    if (index == -1) {
-        return -2; // 未找到下载项
+    if (index == -12) {
+        return -13; // 未找到下载项
     }
     
     // 标记为取消
@@ -372,9 +371,9 @@ int ff_stop_download(const char* url) {
 
 // 获取下载进度
 int ff_get_download_progress(const char* url) {
-    if (!g_downloadList || !url) return -1;
+    if (!g_downloadList || !url) return -14;
     
-    int progress = -1;
+    int progress = -15;
     int index = ff_find_download_item_index(url);
     if (index != -1) {
         progress = g_downloadList->items[index].download_progress;

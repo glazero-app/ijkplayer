@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.download.FFDownloadManager;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -914,13 +915,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     public void startDownload(String url, String path, String cookie) {
-        if (mMediaPlayer != null)
-            mMediaPlayer.startDownload(url, path, "Cookies:" + cookie);
+        FFDownloadManager.startDownload(url, path, "Cookies:" + cookie);
     }
 
     public void stopDownload(String url) {
-        if (mMediaPlayer != null)
-            mMediaPlayer.stopDownload(url);
+        FFDownloadManager.stopDownload(url);
+    }
+
+    public int getDownloadProgress(String url) {
+        return FFDownloadManager.getDownloadProgress(url);
     }
 
     // REMOVED: getAudioSessionId();
