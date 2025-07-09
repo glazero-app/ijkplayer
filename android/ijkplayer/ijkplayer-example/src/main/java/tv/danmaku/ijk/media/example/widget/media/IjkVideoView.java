@@ -377,7 +377,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
 
         if (mMediaPlayer instanceof IjkMediaPlayer) {
-            ((IjkMediaPlayer) mMediaPlayer).setSpeed(1f);
+            ((IjkMediaPlayer) mMediaPlayer).setSpeed(2f);
         }
     }
 
@@ -1111,7 +1111,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
 
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 0);
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0); // 关闭缓冲延迟
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
                 }
 
                 mediaPlayer = ijkMediaPlayer;
