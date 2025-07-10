@@ -48,10 +48,18 @@
             tools:context=".toolbar_widget" />
 
         <ImageView
-            android:id="@+id/iv_record"
+            android:id="@+id/iv_speed"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginLeft="20dp"
+            android:layout_marginTop="70dp"
+            android:src="@drawable/icon_speed" />
+
+        <ImageView
+            android:id="@+id/iv_record"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="70dp"
             android:layout_marginTop="70dp"
             android:src="@drawable/icon_record" />
 
@@ -59,7 +67,7 @@
             android:id="@+id/iv_download"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="120dp"
             android:layout_marginTop="70dp"
             android:src="@drawable/icon_download" />
 
@@ -67,7 +75,7 @@
             android:id="@+id/tv_download_progress"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginLeft="120dp"
+            android:layout_marginLeft="170dp"
             android:layout_marginTop="70dp"
             android:gravity="center"
             android:text="0%" />

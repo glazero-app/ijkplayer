@@ -66,6 +66,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private TableLayout mHudView;
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
+    private ImageView mIvSpeed;
     private ImageView mIvRecord;
     private ImageView mIvDownload;
     private TextView mTvDownloadProgress;
@@ -139,6 +140,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mHudView = (TableLayout) findViewById(R.id.hud_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
+        mIvSpeed = (ImageView) findViewById(R.id.iv_speed);
         mIvRecord = (ImageView) findViewById(R.id.iv_record);
         mIvDownload = (ImageView) findViewById(R.id.iv_download);
         mTvDownloadProgress = (TextView) findViewById(R.id.tv_download_progress);
@@ -164,6 +166,10 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         }
         mVideoView.start();
 
+        mIvSpeed.setOnClickListener(view -> {
+            mVideoView.setSpeed(2f);
+        });
+
         mIvRecord.setOnClickListener(view -> {
             if (!mVideoView.isRecording()) {
                 String path = "/sdcard/DCIM/gzplayer/";
@@ -184,6 +190,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 mTvDownloadProgress.setText(progress + "%");
             });
         });
+
+
     }
 
     @Override

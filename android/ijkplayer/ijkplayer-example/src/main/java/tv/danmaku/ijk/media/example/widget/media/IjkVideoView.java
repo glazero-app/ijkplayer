@@ -375,9 +375,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         } finally {
             // REMOVED: mPendingSubtitleTracks.clear();
         }
+    }
 
+    public void setSpeed(float speed) {
         if (mMediaPlayer instanceof IjkMediaPlayer) {
-            ((IjkMediaPlayer) mMediaPlayer).setSpeed(2f);
+            ((IjkMediaPlayer) mMediaPlayer).setSpeed(speed);
         }
     }
 
