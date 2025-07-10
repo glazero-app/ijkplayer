@@ -1845,9 +1845,9 @@ static void record_error(void *opaque ,int errorCode) {
     const char *cUrl = [url UTF8String];
     const char *cOutputFile = [outputFile UTF8String];
     const char *cookie = [cookieString UTF8String];
-    int ret = ff_start_download(cUrl, cOutputFile, cookie, ^(int progress){
+    int ret = ff_start_download(cUrl, cOutputFile, cookie, ^(int progress, void *a){
         progressBlock(progress);
-    });
+    }, nil);
     return  ret == 0;
 }
 

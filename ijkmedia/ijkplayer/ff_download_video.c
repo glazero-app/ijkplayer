@@ -100,12 +100,20 @@ static int ff_download(const FFDownloadItem* item) {
     // 初始化 FFmpeg 库
     avformat_network_init();
     
-    // 打开输入网络流
+    // 优化网络缓存和超时设置
     AVDictionary *headers = NULL;
+    AVDictionary *options = NULL;
+    av_dict_set(&options, "buffer_size", "4194304", 0); // 4MB 输入缓存
+    av_dict_set(&options, "max_delay", "5000000", 0);  // 5秒最大延迟
+    av_dict_set(&options, "stimeout", "10000000", 0);  // 10秒超时
+    av_dict_set(&options, "rw_timeout", "10000000", 0); // 10秒读写超时
+    
     if (item->cookie) {
-        av_dict_set(&headers, "headers", item->cookie, 0);
+        av_dict_set(&options, "headers", item->cookie, 0);
     }
-    ret = avformat_open_input(&input_format_context, item->url, NULL, &headers);
+    
+    // 打开输入网络流
+    ret = avformat_open_input(&input_format_context, item->url, NULL, &options);
     if (ret < 0) {
         fprintf(stderr, "无法打开输入流: %s\n", av_err2str(ret));
         ff_update_download_progress(item->url, -1); // 错误状态
@@ -183,6 +191,18 @@ static int ff_download(const FFDownloadItem* item) {
         // 确保帧率和时间基一致
         out_stream->time_base = in_stream->time_base;
         out_stream->avg_frame_rate = in_stream->avg_frame_rate;
+        
+        // 优化视频编码参数
+        if (in_codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            // 设置适当的缓冲大小
+//            out_stream->codecpar->buf_size = 2000000; // 2MB缓冲区
+            
+            // 如果是实时流，设置低延迟选项
+            if (av_dict_get(input_format_context->metadata, "live", NULL, 0)) {
+                av_dict_set(&options, "tune", "zerolatency", 0);
+                av_dict_set(&options, "preset", "ultrafast", 0);
+            }
+        }
     }
 
     // 打开输出文件
@@ -195,7 +215,7 @@ static int ff_download(const FFDownloadItem* item) {
     }
 
     // 写入文件头
-    if (avformat_write_header(output_format_context, NULL) < 0) {
+    if (avformat_write_header(output_format_context, &options) < 0) {
         fprintf(stderr, "打开输出文件时出错\n");
         ff_update_download_progress(item->url, -8);
         goto cleanup;
@@ -203,6 +223,9 @@ static int ff_download(const FFDownloadItem* item) {
 
     AVPacket packet;
     int64_t first_pts = AV_NOPTS_VALUE;
+    int64_t last_pts = AV_NOPTS_VALUE;
+    int64_t last_dts = AV_NOPTS_VALUE;
+    int consecutive_errors = 0;
     
     // 主下载循环
     while (1) {
@@ -212,16 +235,41 @@ static int ff_download(const FFDownloadItem* item) {
             break;
         }
         
+        // 重置packet
+        av_init_packet(&packet);
+        packet.data = NULL;
+        packet.size = 0;
+        
         ret = av_read_frame(input_format_context, &packet);
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
                 break;
+            } else if (ret == AVERROR(EAGAIN)) {
+                // 资源暂时不可用，重试
+//                av_usleep(100000); // 100ms
+                consecutive_errors++;
+                if (consecutive_errors > 50) { // 连续多次失败则退出
+                    fprintf(stderr, "连续读取失败: %s\n", av_err2str(ret));
+                    ff_update_download_progress(item->url, -10);
+                    break;
+                }
+                continue;
             } else {
                 fprintf(stderr, "读取帧时出错: %s\n", av_err2str(ret));
                 ff_update_download_progress(item->url, -10);
-                break;
+                
+                // 尝试恢复
+                consecutive_errors++;
+                if (consecutive_errors > 10) {
+                    break;
+                } else {
+                    av_packet_unref(&packet);
+                    continue;
+                }
             }
         }
+        
+        consecutive_errors = 0;
 
         in_stream = input_format_context->streams[packet.stream_index];
         if (packet.stream_index >= stream_mapping_size ||
@@ -230,7 +278,7 @@ static int ff_download(const FFDownloadItem* item) {
             continue;
         }
         
-        // 更新下载进度
+        // 恢复原来的进度计算方式
         ((FFDownloadItem*)item)->downloaded_size += packet.duration / 16.0;
         if (item->total_size > 0) {
             int progress = ((double)item->downloaded_size / item->total_size) * 100;
@@ -248,6 +296,18 @@ static int ff_download(const FFDownloadItem* item) {
         if (first_pts == AV_NOPTS_VALUE) {
             first_pts = packet.pts;
         }
+        
+        // 时间戳校正，防止时间戳回退
+        if (last_pts != AV_NOPTS_VALUE && packet.pts < last_pts) {
+            packet.pts = last_pts + av_rescale_q(40, (AVRational){1, 1000}, in_stream->time_base);
+        }
+        if (last_dts != AV_NOPTS_VALUE && packet.dts < last_dts) {
+            packet.dts = last_dts + av_rescale_q(40, (AVRational){1, 1000}, in_stream->time_base);
+        }
+        
+        last_pts = packet.pts;
+        last_dts = packet.dts;
+
         packet.pts -= first_pts;
         packet.dts -= first_pts;
 
@@ -261,8 +321,13 @@ static int ff_download(const FFDownloadItem* item) {
             fprintf(stderr, "混合数据包时出错: %s\n", av_err2str(ret));
             ff_update_download_progress(item->url, -11);
             av_packet_unref(&packet);
-            break;
+            consecutive_errors++;
+            if (consecutive_errors > 10) {
+                break;
+            }
+            continue;
         }
+        consecutive_errors = 0;
         av_packet_unref(&packet);
     }
 
@@ -291,6 +356,9 @@ cleanup:
     }
     if (headers) {
         av_dict_free(&headers);
+    }
+    if (options) {
+        av_dict_free(&options);
     }
     
     // 从列表中移除已完成的下载项
