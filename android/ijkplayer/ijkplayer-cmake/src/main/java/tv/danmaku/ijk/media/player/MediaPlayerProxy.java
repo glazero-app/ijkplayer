@@ -143,13 +143,13 @@ public class MediaPlayerProxy implements IMediaPlayer {
     }
 
     @Override
-    public void startRecord(String filePath) throws IllegalStateException {
-
+    public int startRecord(String filePath) throws IllegalStateException {
+        return -1;
     }
 
     @Override
-    public void stopRecord() throws IllegalStateException {
-
+    public int stopRecord() throws IllegalStateException {
+        return -1;
     }
 
     @Override

@@ -107,9 +107,9 @@ public interface IMediaPlayer {
 
     long getDuration();
 
-    void startRecord(String filePath) throws IllegalStateException;
+    int startRecord(String filePath) throws IllegalStateException;
 
-    void stopRecord() throws IllegalStateException;
+    int stopRecord() throws IllegalStateException;
 
     boolean isRecording();
 

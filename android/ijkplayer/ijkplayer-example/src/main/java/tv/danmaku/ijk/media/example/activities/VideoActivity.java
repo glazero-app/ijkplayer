@@ -174,10 +174,10 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             if (!mVideoView.isRecording()) {
                 String path = "/sdcard/DCIM/gzplayer/";
                 String name = path + "ijk_" + System.currentTimeMillis() + ".mp4";
-                mVideoView.startRecord(name);
+                int errCode = mVideoView.startRecord(name);
                 mIvRecord.setImageResource(R.drawable.icon_recording);
             } else {
-                mVideoView.stopRecord();
+                int errCode = mVideoView.stopRecord();
                 mIvRecord.setImageResource(R.drawable.icon_record);
             }
         });

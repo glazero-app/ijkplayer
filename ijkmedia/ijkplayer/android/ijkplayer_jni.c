@@ -361,10 +361,11 @@ LABEL_RETURN:
     return retval;
 }
 
-static void
+static jint
 IjkMediaPlayer_startRecord(JNIEnv *env, jobject thiz, jstring path)
 {
     MPTRACE("%s\n", __func__);
+    jint retval = -1;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
 
@@ -372,24 +373,27 @@ IjkMediaPlayer_startRecord(JNIEnv *env, jobject thiz, jstring path)
     c_path = (*env)->GetStringUTFChars(env, path, NULL );
     JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: startRecord: path.string oom", LABEL_RETURN);
 
-    ijkmp_start_recording(mp, c_path);
+    retval = ijkmp_start_recording(mp, c_path);
     (*env)->ReleaseStringUTFChars(env, path, c_path);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
+    return retval;
 }
 
-static void
+static jint
 IjkMediaPlayer_stopRecord(JNIEnv *env, jobject thiz)
 {
     MPTRACE("%s\n", __func__);
+    jint retval = -1;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
 
-    ijkmp_stop_recording(mp);
+    retval = ijkmp_stop_recording(mp);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
+    return retval;
 }
 
 static jboolean
@@ -400,6 +404,7 @@ IjkMediaPlayer_isRecording(JNIEnv* env,jobject thiz)
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: isPlaying: null mp", LABEL_RETURN);
 
     retval = ijkmp_is_recording(mp) ? JNI_TRUE : JNI_FALSE;
+    MPTRACE("%s recording=%d\n", __func__, retval);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -1197,8 +1202,8 @@ static JNINativeMethod g_methods[] = {
     { "isPlaying",              "()Z",      (void *) IjkMediaPlayer_isPlaying },
     { "getCurrentPosition",     "()J",      (void *) IjkMediaPlayer_getCurrentPosition },
     { "getDuration",            "()J",      (void *) IjkMediaPlayer_getDuration },
-    { "_startRecord",           "(Ljava/lang/String;)V",      (void *) IjkMediaPlayer_startRecord },
-    { "_stopRecord",            "()V",      (void *) IjkMediaPlayer_stopRecord },
+    { "_startRecord",           "(Ljava/lang/String;)I",      (void *) IjkMediaPlayer_startRecord },
+    { "_stopRecord",            "()I",      (void *) IjkMediaPlayer_stopRecord },
     { "_isRecording",           "()Z",      (void *) IjkMediaPlayer_isRecording },
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },
