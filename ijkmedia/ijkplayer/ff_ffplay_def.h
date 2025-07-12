@@ -726,7 +726,7 @@ typedef struct FFPlayer {
     AVOutputFormat *m_ofmt;
     pthread_mutex_t record_mutex;       // 锁
     int is_record;                      // 是否在录制
-    int has_found_keyframe;  // 标记是否已找到关键帧
+    int has_found_keyframe;             // 标记是否已找到关键帧
     int record_error;
     
     int is_first;                       // 第一帧数据
