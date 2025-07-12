@@ -451,6 +451,36 @@ fail:
     return -1;
 }
 
+static void ffp_handle_media_packet_for_recording(FFPlayer *ffp, AVPacket *pkt) {
+    // 首先，检查 ffp 和 pkt 是否有效
+    // 使用原子操作来安全地读取标志位
+    if (!ffp || !pkt) {
+        return;
+    }
+    // 首先检查是否处于录制状态
+    av_log(ffp, AV_LOG_INFO, "ffp_record, Hard-decode. isKey=%d\n", pkt->flags & AV_PKT_FLAG_KEY);
+    if (ffp->is_record) {
+        // 使用标准的 AV_PKT_FLAG_KEY 来判断关键帧
+        if (pkt->flags & AV_PKT_FLAG_KEY) {
+            // 如果是视频流的第一个关键帧，则设置标志
+            if (!ffp->has_found_keyframe) {
+                av_log(ffp, AV_LOG_INFO, "ffp_record, Hard-decode path found first key frame.\n");
+                ffp->has_found_keyframe = 1;
+            }
+        }
+
+        // 只有在找到关键帧之后才开始录制
+        if (ffp->has_found_keyframe) {
+            if (0 != ffp_record_file(ffp, pkt)) {
+                ffp->record_error = 1;
+                // 停止录制，后续可优化为安全停止
+                ffp->is_record = 0;
+                av_log(ffp, AV_LOG_ERROR, "ffp_record, Hard-decode path record failed, stopping.\n");
+            }
+        }
+    }
+}
+
 static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *enqueue_count)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
@@ -487,6 +517,10 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
                 ret = -1;
                 goto fail;
             }
+
+            // 录制相关代码
+            ffp_handle_media_packet_for_recording(ffp, &pkt);
+
             if (ffp_is_flush_packet(&pkt) || opaque->acodec_flush_request) {
                 // request flush before lock, or never get mutex
                 opaque->acodec_flush_request = true;
@@ -732,6 +766,10 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 ret = -1;
                 goto fail;
             }
+
+            // 录制相关代码
+            ffp_handle_media_packet_for_recording(ffp, &pkt);
+
             if (ffp_is_flush_packet(&pkt) || opaque->acodec_flush_request) {
                 // request flush before lock, or never get mutex
                 opaque->acodec_flush_request = true;

@@ -644,7 +644,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                    }
                    if (ffp -> has_found_keyframe == 1) {
                        printf("ffp_record, avcodec_send_packet has_found_keyframe\n");
-                       if ( 0 != ffp_record_file(ffp, &pkt)) {
+                       if (0 != ffp_record_file(ffp, &pkt)) {
                            ffp->record_error = 1;
                            ffp_stop_recording_l(ffp);
                            printf("ffp_record, avcodec_send_packet stop\n");
@@ -1719,6 +1719,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     int got_picture;
 
     ffp_video_statistic_l(ffp);
+    printf("ffp_record, get_video_frame\n");
     if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
 
