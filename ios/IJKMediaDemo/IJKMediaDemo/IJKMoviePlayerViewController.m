@@ -102,32 +102,41 @@
         [options setPlayerOptionValue:@"ijklas"         forKey:@"iformat"];
         [options setPlayerOptionIntValue:0              forKey:@"find_stream_info"];
         [options setFormatOptionValue:self.manifest     forKey:@"manifest_string"];
+        
     }
+    // 启用 VideoToolbox 硬解
+//    [options setPlayerOptionIntValue:1 forKey:@"videotoolbox"];
+    
+    [options setFormatOptionValue:@"Cookie: AWSALB=Ci6Qn35OrEtIaCRyWXCS9v4crleOQEK0eEIZsYqEkqfMJrXopC+Yr0XRZw7Xz+OovOdcqFsq1ZjE/T9kwZNJAqqj+AFdkgH70+TbMXhNARzj93lNQOnIRLNB0wPl; AWSALBCORS=Ci6Qn35OrEtIaCRyWXCS9v4crleOQEK0eEIZsYqEkqfMJrXopC+Yr0XRZw7Xz+OovOdcqFsq1ZjE/T9kwZNJAqqj+AFdkgH70+TbMXhNARzj93lNQOnIRLNB0wPl; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTk0NzAvMTc1Mjc1NTIwNzMyNi8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUyODA5MzQ3fX19XX0_; CloudFront-Signature=oF~AYRt0li2JuEsT8EFoe7Yx3vjZ~Ul045HIm6jJ1KIqim~4-WNnOHq2mbrBPfaCWiXuH2Pyn1dLTYl5jCo1zv6dKMraCjKnZECFEaFKUasetQ4FBwy3iTTAsXdjxCm2D0pO1PbLhjRdLK2f-QsyXLOosNe124tdH2atcFoL9LUoNYP-kh4cllIbfpgO6~DUy8WSdn7p3lR8KQoDxCI6vecgSiEy6h1ulSxhjRPxMpnZirQuKWYU6vSJDYuXYyIQogXwP5nEdReQHUhG7GnzE3SoMQM77g8amZeT1~1lUJi3bOL8xHC5C3dSftVPdoi0KE57SIAXKCeraW24Fcn2Og__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL" forKey:@"headers"];
+    
+//    self.url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"playlist" ofType:@"m3u8"]];
+    
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     NSLog(@"%@FFP_MSG_初始化ijk播放器", [self currentDateString]);
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
-    self.player.shouldAutoplay = NO;
+    self.player.shouldAutoplay = YES;
+//    self.player.playbackRate = 8.0;
     [self.player setPauseInBackground:YES];
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
     self.mediaControl.delegatePlayer = self.player;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
-        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8";
-        self -> filePath = filePath;
-        NSString *uuid = [[NSUUID UUID] UUIDString];
-        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
-        NSString * cookieString = @"Cookie:AWSALB=1Q3kPTEO0Ge1TlO6nbWlRLod69wdqctCBYMhKQ/2OlCAfGHYNTJudb/AwDVBZDZzWZkE3wvUSLJgkSsvzeLa4+Un1bEjtAwn8qQJZgWjCzWGAf+9jdGaCU9fPGGp; AWSALBCORS=1Q3kPTEO0Ge1TlO6nbWlRLod69wdqctCBYMhKQ/2OlCAfGHYNTJudb/AwDVBZDZzWZkE3wvUSLJgkSsvzeLa4+Un1bEjtAwn8qQJZgWjCzWGAf+9jdGaCU9fPGGp; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTk0NzAvMTc1MTk3NjM4NDQxOC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUxOTgwMDI3fX19XX0_; CloudFront-Signature=AxLYy4nurSCsVYP-P0kG3tSVQCZbfNz4Gy34E0wCdwIQLjpjIUvF9jEfbllRKOH2ke7-iGk7iHPfuKoLKusgaTLarXetokhQa8GhmUfMfxarttaU6y-aw6Jj~9evuzpDrx6HVy44Fz~cHGknyLM8-GB5ieSJ45mwPWDiCPTkINERD3F5KVeSaYEilnvsJwEI1D896h3-8uQlk9rVF8LdIAgoorpON0DuvFOAuN7ku49Yb6GXAdIh6Seg3uvLcQ8NNDtPWQg1VNJjCef1tk-FNFnA8F-7ZXkxssCc-aRArtmKlUqjdu40LCmFhF~scU6iJd9AvZN7XaRzprT3qdbBzw__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
-        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
-            NSLog(@"当前下载进度--->%d",progress);
-        }];
-        [self saveFileToPhotoLibrary:outfilePath];
-        NSLog(@"%@", outfilePath);
-    });
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+//        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"demo/demo" ofType:@"m3u8"];
+//        filePath = @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8";
+//        self -> filePath = filePath;
+//        NSString *uuid = [[NSUUID UUID] UUIDString];
+//        NSString *outfilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mp4", uuid]];
+//        NSString * cookieString = @"Cookie:AWSALB=1Q3kPTEO0Ge1TlO6nbWlRLod69wdqctCBYMhKQ/2OlCAfGHYNTJudb/AwDVBZDZzWZkE3wvUSLJgkSsvzeLa4+Un1bEjtAwn8qQJZgWjCzWGAf+9jdGaCU9fPGGp; AWSALBCORS=1Q3kPTEO0Ge1TlO6nbWlRLod69wdqctCBYMhKQ/2OlCAfGHYNTJudb/AwDVBZDZzWZkE3wvUSLJgkSsvzeLa4+Un1bEjtAwn8qQJZgWjCzWGAf+9jdGaCU9fPGGp; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTk0NzAvMTc1MTk3NjM4NDQxOC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUxOTgwMDI3fX19XX0_; CloudFront-Signature=AxLYy4nurSCsVYP-P0kG3tSVQCZbfNz4Gy34E0wCdwIQLjpjIUvF9jEfbllRKOH2ke7-iGk7iHPfuKoLKusgaTLarXetokhQa8GhmUfMfxarttaU6y-aw6Jj~9evuzpDrx6HVy44Fz~cHGknyLM8-GB5ieSJ45mwPWDiCPTkINERD3F5KVeSaYEilnvsJwEI1D896h3-8uQlk9rVF8LdIAgoorpON0DuvFOAuN7ku49Yb6GXAdIh6Seg3uvLcQ8NNDtPWQg1VNJjCef1tk-FNFnA8F-7ZXkxssCc-aRArtmKlUqjdu40LCmFhF~scU6iJd9AvZN7XaRzprT3qdbBzw__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL";
+//        [IJKFFMoviePlayerController downloadVideoFromURL:filePath toFile:outfilePath cookieString:cookieString progress:^(int progress) {
+//            NSLog(@"当前下载进度--->%d",progress);
+//        }];
+//        [self saveFileToPhotoLibrary:outfilePath];
+//        NSLog(@"%@", outfilePath);
+//    });
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [IJKFFMoviePlayerController cleanAllDowloadTask];

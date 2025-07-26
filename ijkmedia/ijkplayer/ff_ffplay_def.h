@@ -436,7 +436,7 @@ static const char* wanted_stream_spec[AVMEDIA_TYPE_NB] = {0};
 static int seek_by_bytes = -1;
 static int display_disable;
 static int show_status = 1;
-static int av_sync_type = AV_SYNC_AUDIO_MASTER;
+static int av_sync_type = AV_SYNC_VIDEO_MASTER;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
 static int fast = 0;
@@ -758,7 +758,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->seek_by_bytes          = -1;
     ffp->display_disable        = 0;
     ffp->show_status            = 0;
-    ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
+    ffp->av_sync_type           = AV_SYNC_VIDEO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
     ffp->fast                   = 1;
