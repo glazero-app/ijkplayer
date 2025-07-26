@@ -84,6 +84,104 @@ static void ff_update_download_progress(const char* url, int progress) {
     }
 }
 
+// 时间戳平滑相关定义
+#define TIMESTAMP_BUFFER_SIZE 30  // 时间戳缓冲区大小
+
+// 时间戳平滑器结构：维护时间戳历史、计算平滑值
+typedef struct {
+    int64_t buffer[TIMESTAMP_BUFFER_SIZE];  // 存储最近的时间戳增量
+    int index;                              // 缓冲区当前索引
+    int count;                              // 缓冲区有效数据数量
+    int64_t last_pts;                       // 上一个PTS
+    int64_t last_dts;                       // 上一个DTS
+    int64_t first_pts;                      // 第一个PTS（用于偏移校正）
+    int64_t drift;                          // 时间戳漂移累计值
+    int consecutive_errors;                 // 连续时间戳异常计数
+} TimestampSmoother;
+
+// 初始化时间戳平滑器
+static void init_timestamp_smoother(TimestampSmoother *smoother) {
+    memset(smoother, 0, sizeof(TimestampSmoother));
+    smoother->last_pts = AV_NOPTS_VALUE;
+    smoother->last_dts = AV_NOPTS_VALUE;
+    smoother->first_pts = AV_NOPTS_VALUE;
+    smoother->drift = 0;
+    smoother->consecutive_errors = 0;
+}
+
+// 添加时间戳到缓冲区并返回平滑后的时间戳
+static int64_t smooth_timestamp(TimestampSmoother *smoother, int64_t ts, int is_pts, AVRational time_base) {
+    if (ts == AV_NOPTS_VALUE) {
+        return ts;
+    }
+    
+    // 记录第一个时间戳（作为基准点）
+    if (smoother->first_pts == AV_NOPTS_VALUE) {
+        smoother->first_pts = ts;
+    }
+    
+    // 引用当前类型的上一个时间戳（PTS/DTS）
+    int64_t *last_ts = is_pts ? &smoother->last_pts : &smoother->last_dts;
+    int64_t diff = AV_NOPTS_VALUE;
+    
+    if (*last_ts != AV_NOPTS_VALUE) {
+        diff = ts - *last_ts;
+    }
+    
+    // 计算最小合理增量（基于时间基的40ms，避免过小增量）
+    int64_t min_delta = av_rescale_q(40, (AVRational){1, 1000}, time_base);
+    
+    // 处理时间戳回退或异常小增量的情况
+    if ((diff < 0 || diff < min_delta/2) && *last_ts != AV_NOPTS_VALUE) {
+        // 从缓冲区计算平均增量（排除异常值）
+        int64_t avg_delta = 0;
+        int valid_samples = 0;
+        
+        for (int i = 0; i < smoother->count; i++) {
+            int idx = (smoother->index - i + TIMESTAMP_BUFFER_SIZE) % TIMESTAMP_BUFFER_SIZE;
+            if (smoother->buffer[idx] > min_delta/2) {  // 过滤过小增量
+                avg_delta += smoother->buffer[idx];
+                valid_samples++;
+            }
+        }
+        
+        // 计算合理的预测值
+        int64_t predicted_ts;
+        if (valid_samples > 0) {
+            avg_delta /= valid_samples;
+            predicted_ts = *last_ts + FFMAX(avg_delta, min_delta);  // 取平均或最小增量的较大值
+        } else {
+            // 无历史数据时使用最小增量
+            predicted_ts = *last_ts + min_delta;
+        }
+        
+        // 记录漂移量（实际值与预测值的差异）
+        smoother->drift += predicted_ts - ts;
+        ts = predicted_ts;
+        smoother->consecutive_errors++;  // 计数异常
+    } else {
+        // 正常情况：记录增量到缓冲区
+        if (diff > 0) {
+            smoother->buffer[smoother->index] = diff;
+            smoother->index = (smoother->index + 1) % TIMESTAMP_BUFFER_SIZE;
+            if (smoother->count < TIMESTAMP_BUFFER_SIZE) {
+                smoother->count++;
+            }
+        }
+        smoother->consecutive_errors = 0;  // 重置异常计数
+    }
+    
+    // 连续异常超过阈值时重置平滑器（避免错误累积）
+    if (smoother->consecutive_errors > 5) {
+        init_timestamp_smoother(smoother);
+        smoother->first_pts = ts;  // 以当前时间戳为新基准
+    }
+    
+    // 更新上一个时间戳
+    *last_ts = ts;
+    return ts;
+}
+
 // 下载函数
 static int ff_download(const FFDownloadItem* item) {
     AVFormatContext *input_format_context = NULL;
@@ -96,6 +194,11 @@ static int ff_download(const FFDownloadItem* item) {
     int stream_mapping_size = 0;
     int ret;
     int oldProgress = 0;
+
+    // 初始化时间戳平滑器（音频和视频分别处理）
+    TimestampSmoother video_smoother, audio_smoother;
+    init_timestamp_smoother(&video_smoother);
+    init_timestamp_smoother(&audio_smoother);
 
     // 初始化 FFmpeg 库
     avformat_network_init();
@@ -194,9 +297,6 @@ static int ff_download(const FFDownloadItem* item) {
         
         // 优化视频编码参数
         if (in_codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            // 设置适当的缓冲大小
-//            out_stream->codecpar->buf_size = 2000000; // 2MB缓冲区
-            
             // 如果是实时流，设置低延迟选项
             if (av_dict_get(input_format_context->metadata, "live", NULL, 0)) {
                 av_dict_set(&options, "tune", "zerolatency", 0);
@@ -222,9 +322,7 @@ static int ff_download(const FFDownloadItem* item) {
     }
 
     AVPacket packet;
-    int64_t first_pts = AV_NOPTS_VALUE;
-    int64_t last_pts = AV_NOPTS_VALUE;
-    int64_t last_dts = AV_NOPTS_VALUE;
+    int64_t global_first_pts = AV_NOPTS_VALUE;  // 全局第一个PTS（用于偏移校正）
     int consecutive_errors = 0;
     
     // 主下载循环
@@ -246,13 +344,13 @@ static int ff_download(const FFDownloadItem* item) {
                 break;
             } else if (ret == AVERROR(EAGAIN)) {
                 // 资源暂时不可用，重试
-//                av_usleep(100000); // 100ms
                 consecutive_errors++;
                 if (consecutive_errors > 50) { // 连续多次失败则退出
                     fprintf(stderr, "连续读取失败: %s\n", av_err2str(ret));
                     ff_update_download_progress(item->url, -10);
                     break;
                 }
+//                av_usleep(100000); // 100ms重试间隔
                 continue;
             } else {
                 fprintf(stderr, "读取帧时出错: %s\n", av_err2str(ret));
@@ -269,7 +367,7 @@ static int ff_download(const FFDownloadItem* item) {
             }
         }
         
-        consecutive_errors = 0;
+        consecutive_errors = 0;  // 重置读取错误计数
 
         in_stream = input_format_context->streams[packet.stream_index];
         if (packet.stream_index >= stream_mapping_size ||
@@ -278,42 +376,66 @@ static int ff_download(const FFDownloadItem* item) {
             continue;
         }
         
-        // 恢复原来的进度计算方式
+        // 更新下载进度
         ((FFDownloadItem*)item)->downloaded_size += packet.duration / 16.0;
         if (item->total_size > 0) {
             int progress = ((double)item->downloaded_size / item->total_size) * 100;
-            if (progress > 99) progress = 99;
+            progress = FFMAX(0, FFMIN(99, progress)); // 限制在0-99
             if (progress > oldProgress) {
                 ff_update_download_progress(item->url, progress);
                 oldProgress = progress;
             }
         }
 
+        // 映射流索引
         packet.stream_index = stream_mapping[packet.stream_index];
         out_stream = output_format_context->streams[packet.stream_index];
 
-        // 处理起始偏移
-        if (first_pts == AV_NOPTS_VALUE) {
-            first_pts = packet.pts;
+        // 选择时间戳平滑器（音频/视频分别处理）
+        TimestampSmoother *smoother = NULL;
+        if (in_stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            smoother = &video_smoother;
+        } else if (in_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            smoother = &audio_smoother;
         }
-        
-        // 时间戳校正，防止时间戳回退
-        if (last_pts != AV_NOPTS_VALUE && packet.pts < last_pts) {
-            packet.pts = last_pts + av_rescale_q(40, (AVRational){1, 1000}, in_stream->time_base);
-        }
-        if (last_dts != AV_NOPTS_VALUE && packet.dts < last_dts) {
-            packet.dts = last_dts + av_rescale_q(40, (AVRational){1, 1000}, in_stream->time_base);
-        }
-        
-        last_pts = packet.pts;
-        last_dts = packet.dts;
 
-        packet.pts -= first_pts;
-        packet.dts -= first_pts;
+        // 平滑时间戳（仅音视频流）
+        if (smoother) {
+            // 平滑PTS
+            if (packet.pts != AV_NOPTS_VALUE) {
+                packet.pts = smooth_timestamp(smoother, packet.pts, 1, in_stream->time_base);
+            }
+            
+            // 平滑DTS并确保DTS >= PTS
+            if (packet.dts != AV_NOPTS_VALUE) {
+                packet.dts = smooth_timestamp(smoother, packet.dts, 0, in_stream->time_base);
+                if (packet.pts != AV_NOPTS_VALUE && packet.dts < packet.pts) {
+                    packet.dts = packet.pts; // DTS不能小于PTS
+                }
+            } else if (packet.pts != AV_NOPTS_VALUE) {
+                // 无DTS时使用PTS作为DTS
+                packet.dts = packet.pts;
+            }
+        }
 
-        // 转换时间戳
+        // 记录全局第一个PTS（用于偏移校正）
+        if (global_first_pts == AV_NOPTS_VALUE && packet.pts != AV_NOPTS_VALUE) {
+            global_first_pts = packet.pts;
+        }
+
+        // 校正时间戳偏移（从第一个PTS开始计算）
+        if (global_first_pts != AV_NOPTS_VALUE) {
+            if (packet.pts != AV_NOPTS_VALUE) {
+                packet.pts -= global_first_pts;
+            }
+            if (packet.dts != AV_NOPTS_VALUE) {
+                packet.dts -= global_first_pts;
+            }
+        }
+
+        // 转换时间戳到输出流时间基
         av_packet_rescale_ts(&packet, in_stream->time_base, out_stream->time_base);
-        packet.pos = -1;
+        packet.pos = -1; // 输出流不记录原始位置
 
         // 写入数据包
         ret = av_interleaved_write_frame(output_format_context, &packet);
@@ -354,22 +476,19 @@ cleanup:
     if (stream_mapping) {
         av_freep(&stream_mapping);
     }
-    if (headers) {
-        av_dict_free(&headers);
-    }
-    if (options) {
-        av_dict_free(&options);
-    }
+    av_dict_free(&headers);
+    av_dict_free(&options);
     
     // 从列表中移除已完成的下载项
-    for (int i = 0; i < item->list->size; i++) {
-        if (strcmp(item->list->items[i].url, item->url) == 0) {
-            // 将后面的元素前移
-            for (int j = i; j < item->list->size - 1; j++) {
-                item->list->items[j] = item->list->items[j + 1];
+    if (item->list && item->list->items) {
+        for (int i = 0; i < item->list->size; i++) {
+            if (strcmp(item->list->items[i].url, item->url) == 0) {
+                // 将后面的元素前移
+                memmove(&item->list->items[i], &item->list->items[i + 1],
+                       (item->list->size - i - 1) * sizeof(FFDownloadItem));
+                item->list->size--;
+                break;
             }
-            item->list->size--;
-            break;
         }
     }
     
