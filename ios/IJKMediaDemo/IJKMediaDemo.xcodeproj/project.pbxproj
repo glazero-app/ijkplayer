@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		45D57D611A53233200BDD389 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45D57D601A53233200BDD389 /* CoreVideo.framework */; };
 		45D57D631A53233800BDD389 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45D57D621A53233800BDD389 /* VideoToolbox.framework */; };
+		4967A7E62E34E603000A3B8A /* playlist.m3u8 in Resources */ = {isa = PBXBuildFile; fileRef = 4967A7E12E34E603000A3B8A /* playlist.m3u8 */; };
+		4967A7E72E34E61D000A3B8A /* segment01.ts in Resources */ = {isa = PBXBuildFile; fileRef = 4967A7E22E34E603000A3B8A /* segment01.ts */; };
+		4967A7E82E34E61D000A3B8A /* segment02.ts in Resources */ = {isa = PBXBuildFile; fileRef = 4967A7E32E34E603000A3B8A /* segment02.ts */; };
+		4967A7E92E34E61D000A3B8A /* segment03.ts in Resources */ = {isa = PBXBuildFile; fileRef = 4967A7E42E34E603000A3B8A /* segment03.ts */; };
 		496E3FD62DB0E38C0021A372 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 496E3FD52DB0E38C0021A372 /* Photos.framework */; };
 		55E809E21B143C47003E98A5 /* IJKDemoMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55E809E11B143C47003E98A5 /* IJKDemoMainViewController.m */; };
 		55E809E41B143C85003E98A5 /* IJKDemoMainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 55E809E31B143C85003E98A5 /* IJKDemoMainViewController.xib */; };
@@ -91,6 +95,10 @@
 /* Begin PBXFileReference section */
 		45D57D601A53233200BDD389 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		45D57D621A53233800BDD389 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		4967A7E12E34E603000A3B8A /* playlist.m3u8 */ = {isa = PBXFileReference; lastKnownFileType = text; path = playlist.m3u8; sourceTree = "<group>"; };
+		4967A7E22E34E603000A3B8A /* segment01.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; path = segment01.ts; sourceTree = "<group>"; };
+		4967A7E32E34E603000A3B8A /* segment02.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; path = segment02.ts; sourceTree = "<group>"; };
+		4967A7E42E34E603000A3B8A /* segment03.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; path = segment03.ts; sourceTree = "<group>"; };
 		496E3FD52DB0E38C0021A372 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		55E809E01B143C47003E98A5 /* IJKDemoMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKDemoMainViewController.h; sourceTree = "<group>"; };
 		55E809E11B143C47003E98A5 /* IJKDemoMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKDemoMainViewController.m; sourceTree = "<group>"; };
@@ -170,6 +178,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4967A7E52E34E603000A3B8A /* segment */ = {
+			isa = PBXGroup;
+			children = (
+				4967A7E12E34E603000A3B8A /* playlist.m3u8 */,
+				4967A7E22E34E603000A3B8A /* segment01.ts */,
+				4967A7E32E34E603000A3B8A /* segment02.ts */,
+				4967A7E42E34E603000A3B8A /* segment03.ts */,
+			);
+			path = segment;
+			sourceTree = "<group>";
+		};
 		E63FC27717F032D9003551EB /* Misc */ = {
 			isa = PBXGroup;
 			children = (
@@ -200,6 +219,7 @@
 				E6903F0517EAF70200CFD954 /* IJKMediaDemo */,
 				E6903EFD17EAF70200CFD954 /* Products */,
 				E67323A01B69E6B800CB9036 /* XCAssets */,
+				4967A7E52E34E603000A3B8A /* segment */,
 			);
 			sourceTree = "<group>";
 		};
@@ -373,6 +393,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4967A7E72E34E61D000A3B8A /* segment01.ts in Resources */,
+				4967A7E82E34E61D000A3B8A /* segment02.ts in Resources */,
+				4967A7E92E34E61D000A3B8A /* segment03.ts in Resources */,
 				E6903F0A17EAF70200CFD954 /* InfoPlist.strings in Resources */,
 				E67323AC1B69E76100CB9036 /* MoviePlayerImages.xcassets in Resources */,
 				E6903F1217EAF70200CFD954 /* Default.png in Resources */,
@@ -384,6 +407,7 @@
 				E6F524EC1B183A0700B69DC7 /* IJKDemoSampleViewController.xib in Resources */,
 				55E809E41B143C85003E98A5 /* IJKDemoMainViewController.xib in Resources */,
 				55E809F31B146DE8003E98A5 /* IJKQRCodeScanViewController.xib in Resources */,
+				4967A7E62E34E603000A3B8A /* playlist.m3u8 in Resources */,
 				55E809E61B145B55003E98A5 /* LaunchScreen.xib in Resources */,
 				E67323A81B69E6F800CB9036 /* LaunchImages.xcassets in Resources */,
 				55E809EB1B145BC2003E98A5 /* IJKDemoInputURLViewController.xib in Resources */,

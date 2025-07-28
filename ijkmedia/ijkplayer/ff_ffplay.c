@@ -4463,6 +4463,8 @@ long ffp_get_current_position_l(FFPlayer *ffp)
 
     int64_t pos = 0;
     double pos_clock = get_master_clock(is);
+    double  video_clk = get_clock(&is->vidclk);
+    pos_clock = fmax(pos_clock, video_clk);
     if (isnan(pos_clock)) {
         pos = fftime_to_milliseconds(is->seek_pos);
     } else {
