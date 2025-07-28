@@ -58,14 +58,9 @@
   cd android
   ./install-ffmpeg.sh
   # 使用 Android Studio 打开 ijkplayer 目录工程
-  ```
+  ```  
+Android 编译后带 debug_info 的 so 库位置：build/intermediates/stripped_native_libs
 
 ## FSPlayer
 
 如果 ijkplayer 功能不能满足当前复杂的业务需求，则可以使用 ijkplayer 的升级版 [fsplayer](https://github.com/debugly/fsplayer) ，它提供了更加强劲的功能。
-
-## Donate
-
-维护本项目花费了大量时间和精力，特别是安卓项目，为了让本项目长存，你应该请作者喝杯咖啡，哈哈...
-
-![donate.jpg](https://i.postimg.cc/xdVqnBLp/IMG-7481.jpg)
