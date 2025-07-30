@@ -110,26 +110,10 @@ FFDownloadManager_stopDownload(JNIEnv *env, jobject thiz, jstring url)
     return res;
 }
 
-static jint
-FFDownloadManager_getDownloadProgress(JNIEnv *env, jobject thiz, jstring url)
-{
-    MPTRACE("%s\n", __func__);
-
-    const char *c_url = NULL;
-    c_url = (*env)->GetStringUTFChars(env, url, NULL );
-
-    int res = ff_get_download_progress(c_url);
-
-    (*env)->ReleaseStringUTFChars(env, url, c_url);
-
-    return res;
-}
-
 
 static JNINativeMethod g_methods[] = {
         { "_startDownload",         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ltv/danmaku/ijk/media/player/download/DownloadProgressListener;)I",(void *) FFDownloadManager_startDownload },
         { "_stopDownload",          "(Ljava/lang/String;)I",      (void *) FFDownloadManager_stopDownload },
-        { "_getDownloadProgress",   "(Ljava/lang/String;)I",      (void *) FFDownloadManager_getDownloadProgress },
 };
 
 

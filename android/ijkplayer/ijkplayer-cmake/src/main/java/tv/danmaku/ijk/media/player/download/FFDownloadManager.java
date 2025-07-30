@@ -71,7 +71,5 @@ public final class FFDownloadManager {
 
     private static native int _startDownload(String url, String filePath, String cookies, DownloadProgressListener listener);
     private static native int _stopDownload(String url);
-    @Deprecated
-    private static native int _getDownloadProgress(String url);
 
 }
