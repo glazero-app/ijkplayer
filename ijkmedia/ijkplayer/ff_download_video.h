@@ -56,10 +56,6 @@ int ff_start_download(const char* url, const char* output_file, const char* cook
 // 停止下载
 int ff_stop_download(const char* url);
 
-/// 获取下载进度 0 ~ 100  当进度为-1是均表示下载异常
-/// - Parameter url: 下载链接
-int ff_get_download_progress(const char* url);
-
 #ifdef __cplusplus
 }
 #endif
