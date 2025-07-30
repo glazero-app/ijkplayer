@@ -41,6 +41,7 @@ dependencies {
 
 afterEvaluate {
     // 注意，需要先执行assemble再执行publish
+    // Android 编译后带 debug_info 的 so 库位置：build/intermediates/stripped_native_libs
     def _groupId = "com.glazero.iot"
     def _artifactId = "sdk-player"
     def _versionName = "1.0.1"
