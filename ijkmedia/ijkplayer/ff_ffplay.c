@@ -5315,7 +5315,7 @@ int ffp_record_file(FFPlayer *ffp, AVPacket *packet){
             if (s_record_fail_callback) {
                 s_record_fail_callback(ffp->inject_opaque, ret);
             }
-            av_log(ffp, AV_LOG_ERROR, "ffp_record, Error muxing packet: %s", av_err2str(ret));
+            av_log(ffp, AV_LOG_ERROR, "ffp_record, Error mixing packet: %s", av_err2str(ret));
             
             // 输出更多上下文信息用于调试
             av_log(ffp, AV_LOG_ERROR, "ffp_record, Packet info: stream=%d, pts=%lld, dts=%lld, size=%d, flags=0x%x",
