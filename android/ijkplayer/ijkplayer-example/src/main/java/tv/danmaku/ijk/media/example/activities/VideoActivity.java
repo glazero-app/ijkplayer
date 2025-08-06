@@ -190,8 +190,6 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 mTvDownloadProgress.setText(progress + "%");
             });
         });
-
-
     }
 
     @Override

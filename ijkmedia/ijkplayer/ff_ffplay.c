@@ -631,27 +631,27 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                     return -1;
             }
         } while (d->queue->serial != d->pkt_serial);
-        
+
         if (!ffp->is_first && pkt.pts == pkt.dts) { // 获取开始录制前dts等于pts最后的值
-                   ffp->start_pts = pkt.pts;
-                   ffp->start_dts = pkt.dts;
-               }
-             #pragma  mark - 录制插入
-               if (ffp->is_record) { // 可以录制时，写入文件
-                   printf("ffp_record, avcodec_send_packet codec_type:%d flags:%d\n", d->avctx->codec_type, (pkt.flags & AV_PKT_FLAG_KEY));
-                   if (d->avctx->codec_type == AVMEDIA_TYPE_VIDEO && (pkt.flags & AV_PKT_FLAG_KEY)) {  //首帧为I帧才开始录制
-                       ffp -> has_found_keyframe = 1;
-                   }
-                   if (ffp -> has_found_keyframe == 1) {
-                       printf("ffp_record, avcodec_send_packet has_found_keyframe\n");
-                       if (0 != ffp_record_file(ffp, &pkt)) {
-                           ffp->record_error = 1;
-                           ffp_stop_recording_l(ffp);
-                           printf("ffp_record, avcodec_send_packet stop\n");
-                       }
-                   }
-               }
-        
+            ffp->start_pts = pkt.pts;
+            ffp->start_dts = pkt.dts;
+        }
+        #pragma  mark - 录制插入
+        if (ffp->is_record) { // 可以录制时，写入文件
+            printf("ffp_record, avcodec_send_packet codec_type:%d flags:%d\n", d->avctx->codec_type, (pkt.flags & AV_PKT_FLAG_KEY));
+            if (d->avctx->codec_type == AVMEDIA_TYPE_VIDEO && (pkt.flags & AV_PKT_FLAG_KEY)) {  //首帧为I帧才开始录制
+                ffp -> has_found_keyframe = 1;
+            }
+            if (ffp -> has_found_keyframe == 1) {
+                printf("ffp_record, avcodec_send_packet has_found_keyframe\n");
+                if (0 != ffp_record_file(ffp, &pkt)) {
+                    ffp->record_error = 1;
+                    ffp_stop_recording_l(ffp);
+                    printf("ffp_record, avcodec_send_packet stop\n");
+                }
+            }
+        }
+
         if (pkt.data == flush_pkt.data) {
             avcodec_flush_buffers(d->avctx);
             d->finished = 0;
@@ -5305,11 +5305,11 @@ int ffp_record_file(FFPlayer *ffp, AVPacket *packet){
             av_log(ffp, AV_LOG_WARNING, "ffp_record, Negative DTS corrected to 0: %lld", pkt->dts);
             pkt->dts = 0;
         }
-        
+
         // 打印转换后的时间戳，用于调试
         av_log(ffp, AV_LOG_DEBUG, "ffp_record, After rescale: stream=%d, pts=%lld, dts=%lld, duration=%lld",
               pkt->stream_index, pkt->pts, pkt->dts, pkt->duration);
-        
+
         // 写入数据包
         if ((ret = av_interleaved_write_frame(ffp->m_ofmt_ctx, pkt)) < 0) {
             if (s_record_fail_callback) {
