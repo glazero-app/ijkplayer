@@ -167,7 +167,7 @@ static const AVOption ffp_context_options[] = {
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
-        OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
+        OPTION_OFFSET(videotoolbox),        OPTION_INT(1, 0, 1) },
     { "videotoolbox-max-frame-width",       "VideoToolbox: max width of output frame",
         OPTION_OFFSET(vtb_max_frame_width), OPTION_INT(0, 0, INT_MAX) },
     { "videotoolbox-async",                 "VideoToolbox: use kVTDecodeFrame_EnableAsynchronousDecompression()",

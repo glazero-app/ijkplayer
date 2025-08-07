@@ -107,7 +107,7 @@
     // 启用 VideoToolbox 硬解
 //    [options setPlayerOptionIntValue:1 forKey:@"videotoolbox"];
     
-    [options setFormatOptionValue:@"Cookie: AWSALB=Ci6Qn35OrEtIaCRyWXCS9v4crleOQEK0eEIZsYqEkqfMJrXopC+Yr0XRZw7Xz+OovOdcqFsq1ZjE/T9kwZNJAqqj+AFdkgH70+TbMXhNARzj93lNQOnIRLNB0wPl; AWSALBCORS=Ci6Qn35OrEtIaCRyWXCS9v4crleOQEK0eEIZsYqEkqfMJrXopC+Yr0XRZw7Xz+OovOdcqFsq1ZjE/T9kwZNJAqqj+AFdkgH70+TbMXhNARzj93lNQOnIRLNB0wPl; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTcvZ2xhemVyby9jbG91ZC9DMkUyREExMTAwMTk0NzAvMTc1Mjc1NTIwNzMyNi8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzUyODA5MzQ3fX19XX0_; CloudFront-Signature=oF~AYRt0li2JuEsT8EFoe7Yx3vjZ~Ul045HIm6jJ1KIqim~4-WNnOHq2mbrBPfaCWiXuH2Pyn1dLTYl5jCo1zv6dKMraCjKnZECFEaFKUasetQ4FBwy3iTTAsXdjxCm2D0pO1PbLhjRdLK2f-QsyXLOosNe124tdH2atcFoL9LUoNYP-kh4cllIbfpgO6~DUy8WSdn7p3lR8KQoDxCI6vecgSiEy6h1ulSxhjRPxMpnZirQuKWYU6vSJDYuXYyIQogXwP5nEdReQHUhG7GnzE3SoMQM77g8amZeT1~1lUJi3bOL8xHC5C3dSftVPdoi0KE57SIAXKCeraW24Fcn2Og__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL" forKey:@"headers"];
+    [options setFormatOptionValue:@"Cookie: AWSALB=dQAYcggt7/8LSLFnr4eFBSdhTRx4Bf72VXz5nrTP4uKE3EVLvR5odj61gY7eecHzc/ofvC7D32vVovT5aW2ENd4w0njkAVdDk3q6gkYFKPo55kuwJ9FcGnOZEVIq; AWSALBCORS=dQAYcggt7/8LSLFnr4eFBSdhTRx4Bf72VXz5nrTP4uKE3EVLvR5odj61gY7eecHzc/ofvC7D32vVovT5aW2ENd4w0njkAVdDk3q6gkYFKPo55kuwJ9FcGnOZEVIq; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kb3duLWNuLmFvc3VsaWZlLmNvbS9jbG91ZC1zdG9yYWdlLTE0L3NhZmVuZXN0L2Nsb3VkL0MyRTJEQTExMDAxOTQ3MC8xNzU0Mzc3ODM0ODI0LyoiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3NTQzOTc1NDd9fX1dfQ__; CloudFront-Signature=glUkAIzxF9E7gcH-DYtcCoEFOhZL45ty9PcubNRYfIhr2kVpJ9rSdRHIku~z3QKkzoQukPVlGHNlkx3TsXPShku1LuqUWTg618Qf5zEj0FZsTlH5mlz0NkHhahjna3CSu-b02qtqyMv8vOtfrtHyI8t80cf65Ls12nWOy5odqoZq7EQmY~BQkY-5Nu5KjFm12n0lEKAaKdKVUIKUBvMiDG2Gy0Q7OJleK2TyINmTnV3Ru4MMzjmdEcDwPe6Op-k4gJDQ7hEGDxB4IiR2ZkHNEUuBIGebFXyknsidCggijuHiZ0LLma4rIp4TbVNJDkWbDvJw8-fOcb6tyRXAtcCRNA__; CloudFront-Key-Pair-Id=KQ613EGKVRRWL" forKey:@"headers"];
     
 //    self.url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"playlist" ofType:@"m3u8"]];
     
@@ -197,14 +197,14 @@
 
 - (IBAction)onClickHUD:(UIBarButtonItem *)sender
 {
-    if (self.player.playbackRate > 4) {
-        self.player.playbackRate = 1.0;
-    } else {
-        self.player.playbackRate += 0.5;
-    }
-    sender.title = [NSString stringWithFormat:@"%.1fX", self.player.playbackRate];
-    
-    return;
+//    if (self.player.playbackRate > 4) {
+//        self.player.playbackRate = 1.0;
+//    } else {
+//        self.player.playbackRate += 0.5;
+//    }
+//    sender.title = [NSString stringWithFormat:@"%.1fX", self.player.playbackRate];
+//    
+//    return;
     if ([self.player isRecording]) {
         [self stopRecord];
     } else {

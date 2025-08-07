@@ -13,6 +13,8 @@
 		33BA6FC2254BC4DE004EB9F2 /* cJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = B417F8DB24F7C3B400D159BB /* cJSON.h */; };
 		4910C71D2E13D1A30052B3BB /* ff_download_video.c in Sources */ = {isa = PBXBuildFile; fileRef = 4910C71C2E13D1A30052B3BB /* ff_download_video.c */; };
 		4910C71E2E13D1A30052B3BB /* ff_download_video.h in Headers */ = {isa = PBXBuildFile; fileRef = 4910C71B2E13D1A30052B3BB /* ff_download_video.h */; };
+		4967A7ED2E434DF8000A3B8A /* ffplayer_record_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 4967A7EC2E434DF8000A3B8A /* ffplayer_record_thread.c */; };
+		4967A7EE2E434DF8000A3B8A /* ffplayer_record_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 4967A7EB2E434DF8000A3B8A /* ffplayer_record_thread.h */; };
 		4D32BC821F906E3B00CE9F03 /* IJKSDLGLViewProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D32BC801F906E3600CE9F03 /* IJKSDLGLViewProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4DA7F68A1F2B1E270032A499 /* ijkiourlhook.c in Sources */ = {isa = PBXBuildFile; fileRef = 4DA7F6881F2B1E270032A499 /* ijkiourlhook.c */; };
 		5450AFC41E63EA4300568494 /* IJKKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = E65DC3B819D93D5F004F8A08 /* IJKKVOController.m */; };
@@ -158,6 +160,8 @@
 		45DB4AA81A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ijksdl_vout_overlay_videotoolbox.m; sourceTree = "<group>"; };
 		4910C71B2E13D1A30052B3BB /* ff_download_video.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ff_download_video.h; sourceTree = "<group>"; };
 		4910C71C2E13D1A30052B3BB /* ff_download_video.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ff_download_video.c; sourceTree = "<group>"; };
+		4967A7EB2E434DF8000A3B8A /* ffplayer_record_thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ffplayer_record_thread.h; sourceTree = "<group>"; };
+		4967A7EC2E434DF8000A3B8A /* ffplayer_record_thread.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ffplayer_record_thread.c; sourceTree = "<group>"; };
 		4D32BC801F906E3600CE9F03 /* IJKSDLGLViewProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IJKSDLGLViewProtocol.h; sourceTree = "<group>"; };
 		4DA7F6881F2B1E270032A499 /* ijkiourlhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkiourlhook.c; sourceTree = "<group>"; };
 		5407EC271DF7F93B00457BFE /* IJKVideoToolBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKVideoToolBox.h; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.h; sourceTree = "<group>"; };
@@ -558,6 +562,8 @@
 				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
 				4910C71B2E13D1A30052B3BB /* ff_download_video.h */,
 				4910C71C2E13D1A30052B3BB /* ff_download_video.c */,
+				4967A7EB2E434DF8000A3B8A /* ffplayer_record_thread.h */,
+				4967A7EC2E434DF8000A3B8A /* ffplayer_record_thread.c */,
 				E69BE5491B93FED300AFBA3F /* ijkavformat */,
 				E69BE54E1B93FED300AFBA3F /* ijkavutil */,
 				E6FAD9551A515CE300725002 /* ijkmeta.c */,
@@ -806,6 +812,7 @@
 				5450B0371E63EA4300568494 /* IJKMediaPlayer.h in Headers */,
 				5450B0381E63EA4300568494 /* internal.h in Headers */,
 				5450B0391E63EA4300568494 /* IJKVideoToolBoxSync.h in Headers */,
+				4967A7EE2E434DF8000A3B8A /* ffplayer_record_thread.h in Headers */,
 				5450B03A1E63EA4300568494 /* IJKMPMoviePlayerController.h in Headers */,
 				5450B03B1E63EA4300568494 /* ijkavformat.h in Headers */,
 				4910C71E2E13D1A30052B3BB /* ff_download_video.h in Headers */,
@@ -1008,6 +1015,7 @@
 				5450B0141E63EA4300568494 /* ijklongurl.c in Sources */,
 				5450B0151E63EA4300568494 /* renderer_rgb.c in Sources */,
 				5450B0161E63EA4300568494 /* ffpipeline_ffplay.c in Sources */,
+				4967A7ED2E434DF8000A3B8A /* ffplayer_record_thread.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -43,7 +43,7 @@
     [sampleList addObject:@[@"m3u8",
                             @"https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8"]];
     [sampleList addObject:@[@"Aosu m3u8",
-                            @"https://down-cn.aosulife.com/cloud-storage-7/glazero/cloud/C2E2DA110019470/1752755207326/playlist.m3u8"]];
+                            @"https://down-cn.aosulife.com/cloud-storage-14/safenest/cloud/C2E2DA110019470/1754377834824/playlist.m3u8"]];
     [sampleList addObject:@[@"1080-mp4",
                             @"https://bdcloud-player-new.cdn.bcebos.com/testvideo/mp4/vvc/1080p/liulangdiqiu-266-1080.mp4"]];
     [sampleList addObject:@[@"flv",

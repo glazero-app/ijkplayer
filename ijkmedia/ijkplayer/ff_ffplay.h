@@ -124,9 +124,10 @@ struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 //ff_play.h
 int ffp_start_recording_l(FFPlayer *ffp,const char *file_name);
 int ffp_stop_recording_l(FFPlayer *ffp);
-int ffp_record_file(FFPlayer *ffp, AVPacket *packet);
 
 typedef void (*ffp_record_fail_callback)(void *opaque ,int errorCode);
+
+static ffp_record_fail_callback s_record_fail_callback;
 
 void  ffp_global_set_record_fail_callback(ffp_record_fail_callback cb);
 

@@ -765,9 +765,22 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
     int      ret            = 0;
     uint8_t *size_data      = NULL;
     int      size_data_size = 0;
-
+    FFPlayer *ffp =   context -> ffp;
     if (!avpkt || !avpkt->data) {
         return 0;
+    }
+    
+    if (ffp -> is_record ) {
+        if (avpkt -> flags & AV_PKT_FLAG_KEY) {
+            ffp -> has_found_keyframe = 1;
+        }
+        if (ffp -> has_found_keyframe) {
+            if (0 != ffp_record_thread_send_packet(ffp, avpkt)) {
+                ffp->record_error = 1;
+                ffp_stop_recording_l(ffp);
+                printf("ffp_record, avcodec_send_packet stop\n");
+            }
+        }
     }
 
     if (context->ffp->vtb_handle_resolution_change &&
