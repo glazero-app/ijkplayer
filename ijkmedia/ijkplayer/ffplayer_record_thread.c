@@ -34,7 +34,7 @@ int ffp_record_thread_start(FFPlayer *ffp) {
     ffp->record_thread_args->running = 1;
     ffp->record_thread_id = 0;
 
-    int ret = pthread_create(&ffp->record_thread_id, NULL, record_thread, &ffp->record_thread_args);
+    int ret = pthread_create(&ffp->record_thread_id, NULL, record_thread, ffp->record_thread_args);
     if (ret != 0) {
         av_log(ffp, AV_LOG_ERROR, "Record thread: Failed to create record thread: %s\n", strerror(ret));
         return AVERROR(ret);
