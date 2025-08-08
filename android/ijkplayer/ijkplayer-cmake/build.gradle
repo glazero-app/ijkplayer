@@ -44,8 +44,8 @@ afterEvaluate {
     // Android 编译后带 debug_info 的 so 库位置：build/intermediates/stripped_native_libs
     def _groupId = "com.glazero.iot"
     def _artifactId = "sdk-player"
-    def _versionName = "1.0.1"
-    def _versionCode = "1003"
+    def _versionName = "1.0.2"
+    def _versionCode = "1004"
 
     publishing {
         publications {
