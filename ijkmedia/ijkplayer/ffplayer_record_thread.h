@@ -20,13 +20,13 @@ typedef struct {
 RecordThreadArgs *ffp_record_thread_init(FFPlayer *ffp);
 
 // 启动录制线程
-int ffp_record_thread_start(RecordThreadArgs *args);
+int ffp_record_thread_start(FFPlayer *ffp);
 
 // 向录制线程发送数据包进行处理
 int ffp_record_thread_send_packet(FFPlayer *ffp, AVPacket *packet);
 
 // 停止录制线程
-void ffp_record_thread_stop(RecordThreadArgs *args);
+void ffp_record_thread_stop(FFPlayer *ffp);
 
 
 #endif // FFPLAYER_RECORD_THREAD_H

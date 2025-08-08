@@ -1718,7 +1718,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     int got_picture;
 
     ffp_video_statistic_l(ffp);
-    printf("ffp_record, get_video_frame\n");
+    ALOGD("ffp_record, get_video_frame\n");
     if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
 
@@ -5153,7 +5153,7 @@ int ffp_start_recording_l(FFPlayer *ffp, const char *file_name) {
         goto end;
     }
     ffp->record_thread_args = ffp_record_thread_init(ffp);
-    ffp_record_thread_start(ffp->record_thread_args);
+    ffp_record_thread_start(ffp);
     ffp->is_record = 1;
     ffp->record_error = 0;
     pthread_mutex_init(&ffp->record_mutex, NULL);
@@ -5190,7 +5190,7 @@ int ffp_stop_recording_l(FFPlayer *ffp){
         pthread_mutex_destroy(&ffp->record_mutex);
         av_log(ffp, AV_LOG_DEBUG, "ffp_record, stopRecord ok\n");
         if (ffp->record_thread_args) {
-            ffp_record_thread_stop(ffp->record_thread_args);
+            ffp_record_thread_stop(ffp);
             ffp->record_thread_args = NULL; // 防止重复释放
         }
     } else {

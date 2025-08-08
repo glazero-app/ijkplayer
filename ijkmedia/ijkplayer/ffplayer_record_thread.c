@@ -6,20 +6,17 @@
 static void *record_thread(void *arg);
 // 初始化录制线程
 RecordThreadArgs *ffp_record_thread_init(FFPlayer *ffp) {
+    av_log(ffp, AV_LOG_INFO, "Record thread: record thread init\n");
     RecordThreadArgs *args = av_mallocz(sizeof(RecordThreadArgs));
     if (!args) {
-        av_log(ffp, AV_LOG_ERROR, "Failed to allocate memory for record thread args\n");
+        av_log(ffp, AV_LOG_ERROR, "Record thread: Failed to allocate memory for record thread args\n");
         return NULL;
     }
-    
-    args->ffp = ffp;
-    args->packet = NULL;
-    args->running = 1;
-    
+
     // 初始化互斥锁和条件变量
     if (pthread_mutex_init(&args->mutex, NULL) != 0 ||
         pthread_cond_init(&args->cond, NULL) != 0) {
-        av_log(ffp, AV_LOG_ERROR, "Failed to initialize mutex or condition variable\n");
+        av_log(ffp, AV_LOG_ERROR, "Record thread: Failed to initialize mutex or condition variable\n");
         av_free(args);
         return NULL;
     }
@@ -28,24 +25,25 @@ RecordThreadArgs *ffp_record_thread_init(FFPlayer *ffp) {
 }
 
 // 启动录制线程
-int ffp_record_thread_start(RecordThreadArgs *args) {
-    if (!args) return AVERROR(EINVAL);
-    
-    pthread_t thread;
-    int ret = pthread_create(&thread, NULL, record_thread, args);
+int ffp_record_thread_start(FFPlayer *ffp) {
+    av_log(ffp, AV_LOG_INFO, "Record thread: record thread start\n");
+    if (!ffp->record_thread_args) return AVERROR(EINVAL);
+
+    ffp->record_thread_args->ffp = ffp;
+    ffp->record_thread_args->packet = NULL;
+    ffp->record_thread_args->running = 1;
+    ffp->record_thread_id = 0;
+
+    int ret = pthread_create(&ffp->record_thread_id, NULL, record_thread, &ffp->record_thread_args);
     if (ret != 0) {
-        av_log(args->ffp, AV_LOG_ERROR, "Failed to create record thread: %s\n", strerror(ret));
+        av_log(ffp, AV_LOG_ERROR, "Record thread: Failed to create record thread: %s\n", strerror(ret));
         return AVERROR(ret);
     }
-    
-    // 分离线程，使其在结束时自动释放资源
-    pthread_detach(thread);
     return 0;
 }
 
 // 向录制线程发送数据包进行处理
 int ffp_record_thread_send_packet(FFPlayer *ffp, AVPacket *packet) {
-   
     RecordThreadArgs *args = ffp->record_thread_args;
     if (!args || !packet || !args->running) {
         return AVERROR(EINVAL);
@@ -81,23 +79,41 @@ int ffp_record_thread_send_packet(FFPlayer *ffp, AVPacket *packet) {
 }
 
 // 停止录制线程
-void ffp_record_thread_stop(RecordThreadArgs *args) {
+void ffp_record_thread_stop(FFPlayer *ffp) {
+    RecordThreadArgs *args = ffp->record_thread_args;
     if (!args) return;
-    
+
+    // 1. 发送停止信号
     pthread_mutex_lock(&args->mutex);
-    args->running = 0;
-    pthread_cond_signal(&args->cond); // 唤醒线程使其退出
+    if (args->running) { // 避免重复停止
+        args->running = 0;
+        pthread_cond_signal(&args->cond); // 唤醒线程使其退出
+    }
     pthread_mutex_unlock(&args->mutex);
-    
-    // 等待线程结束并释放资源
+
+    // 2. 【关键步骤】等待线程自然结束
+    // pthread_join 会阻塞当前线程（主线程），直到 thread_id 代表的线程完全退出。
+    // 这确保了 record_thread 已经执行完它所有的代码，不再需要 args 中的任何资源。
+    ALOGD("ffp_record, ffp->record_thread_id: %ld", ffp->record_thread_id);
+    if (ffp->record_thread_id != 0) { // 检查线程ID是否有效
+        void *thread_return_value;
+        int ret = pthread_join(ffp->record_thread_id, &thread_return_value);
+        if (ret != 0) {
+            // 打印日志，join 失败可能是个问题
+            ALOGE("ffp_record, Failed to join record thread: %s", strerror(ret));
+        }
+    }
+
+    // 3. 在确认线程已经结束后，才安全地销毁资源
     pthread_mutex_destroy(&args->mutex);
     pthread_cond_destroy(&args->cond);
-    
+
+    // 4. 释放剩余的资源
     if (args->packet) {
         av_packet_unref(args->packet);
+        // 注意：这里 packet 是一个指针，应该释放指针本身
         av_packet_free(&args->packet);
     }
-    
     av_free(args);
 }
 
@@ -269,19 +285,24 @@ exit:
 }
     
 
-
 // 录制线程的主函数
 static void *record_thread(void *arg) {
     RecordThreadArgs *args = (RecordThreadArgs *)arg;
     FFPlayer *ffp = args->ffp;
-    
-    av_log(ffp, AV_LOG_INFO, "Record thread started\n");
-    
+
+    av_log(ffp, AV_LOG_INFO, "Record thread: started running=%d\n", args->running);
+
     while (args->running) {
-        pthread_mutex_lock(&args->mutex);
+        int ret = pthread_mutex_lock(&args->mutex);
+        if (ret != 0) {
+            // 如果加锁失败，打印错误并退出
+            av_log(ffp, AV_LOG_ERROR, "Record thread: failed to lock mutex: %s\n", strerror(ret));
+            break;
+        }
         
         // 等待新的数据包或退出信号
         while (args->running && !args->packet) {
+            // 打印日志，确认即将进入 wait
             pthread_cond_wait(&args->cond, &args->mutex);
         }
         
@@ -301,7 +322,7 @@ static void *record_thread(void *arg) {
         pthread_mutex_unlock(&args->mutex);
     }
     
-    av_log(ffp, AV_LOG_INFO, "Record thread exited\n");
+    av_log(ffp, AV_LOG_INFO, "Record thread: exited\n");
     return NULL;
 }
 

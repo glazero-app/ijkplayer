@@ -30,6 +30,7 @@
 #include "ijksdl/android/ijksdl_vout_overlay_android_mediacodec.h"
 #include "ijkplayer/ff_ffpipenode.h"
 #include "ijkplayer/ff_ffplay.h"
+#include "ijkplayer/ffplayer_record_thread.h"
 #include "ijkplayer/ff_ffplay_debug.h"
 #include "h264_nal.h"
 #include "hevc_nal.h"
@@ -471,7 +472,7 @@ static void ffp_handle_media_packet_for_recording(FFPlayer *ffp, AVPacket *pkt) 
 
         // 只有在找到关键帧之后才开始录制
         if (ffp->has_found_keyframe) {
-            if (0 != ffp_record_file(ffp, pkt)) {
+            if (0 != ffp_record_thread_send_packet(ffp, pkt)) {
                 ffp->record_error = 1;
                 // 停止录制，后续可优化为安全停止
                 ffp->is_record = 0;

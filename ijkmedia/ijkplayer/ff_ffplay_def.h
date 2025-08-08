@@ -734,6 +734,7 @@ typedef struct FFPlayer {
     int64_t start_pts;                  // 开始录制时pts
     int64_t start_dts;                  // 开始录制时dts
     RecordThreadArgs *record_thread_args;  // 录制线程参数作为成员变量
+    pthread_t         record_thread_id;   // 持有线程ID，用于管理
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
