@@ -36,6 +36,8 @@
 #include <ijkplayer/ff_download_video.h>
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001";
+typedef void(^ProgressBlock)(int progress);
+static  NSMutableDictionary *_progressblockDic;
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -107,6 +109,10 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
 @synthesize isVideoSync = _isVideoSync;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
+
++(void)initialize {
+    _progressblockDic = [NSMutableDictionary dictionary];
+}
 
 // as an example
 void IJKFFIOStatDebugCallback(const char *url, int type, int bytes)
@@ -1841,13 +1847,22 @@ static void record_error(void *opaque ,int errorCode) {
     }
 }
 
+static void download_progress(int progress, void *url) {
+    ProgressBlock  block = [_progressblockDic objectForKey: (__bridge id _Nonnull)(url)];
+    if (block) {
+        block(progress);
+        if (progress == 100) {
+            [_progressblockDic removeObjectForKey:(__bridge id _Nonnull)(url)];
+        }
+    }
+}
+
 +(BOOL)downloadVideoFromURL:(NSString *)url toFile:(NSString *)outputFile cookieString:(NSString *)cookieString progress:(void (^)(int))progressBlock {
     const char *cUrl = [url UTF8String];
     const char *cOutputFile = [outputFile UTF8String];
     const char *cookie = [cookieString UTF8String];
-    int ret = ff_start_download(cUrl, cOutputFile, cookie, ^(int progress, void *a){
-        progressBlock(progress);
-    }, nil);
+    [_progressblockDic setObject:progressBlock forKey:url];
+    int ret = ff_start_download(cUrl, cOutputFile, cookie, download_progress, (__bridge void *)(url));
     return  ret == 0;
 }
 
